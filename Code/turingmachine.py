@@ -11,6 +11,8 @@
             for a particular state yet when triggere]\d, will be buggy)
 
 			End
+        HHAHAHA
+
 """
 
 import timeit
@@ -32,6 +34,7 @@ def run_turing_list(filename=None):
 
 def run_turing_string(filename=None):
     """
+    Testing
     @purpose: Starts the turing machine simulation.
     @param: filename - String, specifies the filename of the XML to load from
     @postcondition: Prints the output of the turing machine simulation.
@@ -73,7 +76,7 @@ if __name__ == "__main__":
     # run_turing("./machines/test3-right-creator-halt-no.xml")
     # run_turing("./machines/test4-blank-in-middle.xml")
 
-    n = 1000
+    n = 1500
     # cProfile.run('''timeit.timeit('run_turing_deque("./machines/subtractor-machine.xml")',
     #                     number=10000, setup="from __main__ import run_turing_deque")''')
     print "String ",

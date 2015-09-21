@@ -1,0 +1,241 @@
+#:kivy 1.9.0
+<Container>:
+    RelativeLayout:
+        size:root.size
+        pos: root.pos
+        orientation: 'vertical'
+        id: container_rl
+
+        BoxLayout:
+            size_hint_y: 0.85
+            pos_hint: {'y':0}
+
+            ScatterLayout:
+                size_hint: (2,2)
+                id: layout_states
+                bcolor: 0.7, 0.7, 0.7, 1
+                canvas.before:
+                    Color:
+                        rgba: self.bcolor
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+        BoxLayout:
+            size_hint_y: 0.1
+            pos_hint: {'y':0.9}
+            orientation: 'horizontal'
+            Button:
+                id: savexml_button
+                text: "Spike1 SaveXML"
+                on_press: root.savexml_handler(self.text)
+
+            Button:
+                id: load_button
+                text: "Spike2 LoadXML"
+                on_press: root.load_handler(self.text)
+
+            Button:
+                id: edit_button
+                text: "Spike3 Edit"
+                on_press: root.edit_handler(self)
+
+            Button:
+                id: save_button
+                text: "Spike3 Save"
+                on_press: root.save_handler(self.text)
+
+            Button:
+                id: zoom_button
+                text: "Spike4 + Zoom"
+                on_press: root.zoomplus_handler()
+
+            Button:
+                id: zoomout_button
+                text: "Spike4 - Zoom"
+                on_press: root.zoomminus_handler()
+
+
+#### DIALOGS
+<SaveFileChooserWindow>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+
+        BoxLayout:
+            size: root.size
+            pos: root.pos
+            padding: [0,30,0,30]
+            FileChooserListView:
+                size: root.size
+                pos: root.pos
+                id: savefilechooser
+
+        BoxLayout:
+            size_hint_y: 0.1
+
+            Button:
+                text: "Cancel"
+                on_release: root.cancel_dialog()
+
+            Button:
+                text: "Save"
+                on_release: root.save_file(savefilechooser.path, savefilechooser.selection)
+
+
+<BrowseFileChooserWindow>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+
+        BoxLayout:
+            size: root.size
+            pos: root.pos
+            padding: [0,30,0,30]
+            FileChooserListView:
+                size: root.size
+                pos: root.pos
+                id: filechooser
+
+        BoxLayout:
+            size_hint_y: 0.1
+
+            Button:
+                text: "Cancel"
+                on_release: root.cancel_dialog()
+
+            Button:
+                text: "Load"
+                on_release: root.load_file(filechooser.path, filechooser.selection)
+
+
+<Spike1Message>:
+    RelativeLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+
+        Label:
+            #size_hint_y: 0.6
+            pos_hint_y: 0.8
+
+            text: "TEST Save New XML: Save a new TM XML in current directory named 1.xml \nTEST Update XML: Update the 1.xml in current directory with new data"
+        BoxLayout:
+            size_hint_y: 0.3
+            orientation: "horizontal"
+            Button:
+                text: "TEST Save New XML"
+                on_release: root.test1()
+            Button:
+                text: "TEST Update XML"
+                on_release: root.test2()
+
+###################### UIObjs
+<UIObj_State@Widget>:
+    canvas:
+        Color:
+            rgba: 0.1,0.1,0.1,1
+        Ellipse:
+            pos: self.pos
+            size: self.size
+
+<UIObj_State_Halting>:
+    canvas:
+        Color:
+            rgba: 0.1,0.1,0.1,1
+        Ellipse:
+            pos: self.pos
+            size: self.size
+        Color:
+            rgba: 0.4,0.4,0.4,1
+        Ellipse:
+            pos: (self.pos[0] + self.size[0]*0.05, self.pos[1] + self.size[1]*0.05)
+            size: (self.size[0] * 0.9, self.size[1] * 0.9)
+
+
+
+<UIObj_State_Template>:
+    canvas.before:
+        Color:
+            rgba: 0.4,0.4,0.4,0.2
+        Ellipse:
+            pos: self.pos
+            size: self.size
+
+    canvas:
+        Color:
+            rgba: 0.4,0.7,0.1,1
+        Ellipse:
+            pos: self.pos
+            size: self.size
+
+
+<UIObj_State_Halting_Template>:
+    canvas:
+        Color:
+            rgba: 0.1,0.1,0.1,1
+        Ellipse:
+            pos: self.pos
+            size: self.size
+        Color:
+            rgba: 0.4,0.4,0.4,1
+        Ellipse:
+            pos: (self.pos[0] + self.size[0]*0.05, self.pos[1] + self.size[1]*0.05)
+            size: (self.size[0] * 0.9, self.size[1] * 0.9)
+
+
+# UNUSED
+<UIObj_Transition>:
+    canvas:
+        Color:
+            rgba: 0,0,0,1
+        Line:
+            bezier: (self.origin_x, self.origin_y, self.mid_x*1.2, self.mid_y*1.2, self.end_x, self.end_y)
+            width: 2
+    Label:
+        text: root.tid
+        pos: root.mid_x, root.mid_y
+        size: (30,30)
+        size_hint: None, None
+
+
+# UI MENUS AND TOOLBARS
+<UIObj_Edit>:
+    pos: (0,-100)
+    canvas.before:
+        Color:
+            rgba: 0.1,0.1,0.1,0.7
+        Rectangle:
+            pos: self.pos
+            size: (10000,100)
+    RelativeLayout:
+        id: temp_layout
+        padding: 10
+        orientation: "horizontal"
+        Label:
+            text: "Edit Mode: Drag to Add New States \nClick state to show menu"
+            pos: (150,0)
+            size: (300,100)
+            size_hint: (None, None)
+    BoxLayout:
+        id: delete
+
+
+
+<UI_LongTouch_Menu>:
+    id: long_touch_menu
+    BoxLayout:
+        size: 200,100
+        pos: 0,100
+        orientation: "horizontal"
+
+        Button:
+            text: "Delete State"
+            on_release: root.delete_state()
+
+
+
+
+

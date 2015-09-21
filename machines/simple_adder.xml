@@ -1,0 +1,23 @@
+<turingmachine>
+  <alphabet>0123b</alphabet>
+  <initialtape>111b1</initialtape>
+  <blank char="b"/>
+  <initialstate name="0" />
+  <finalstates>
+    <finalstate name="halt" />
+  </finalstates>
+  <states>
+    <state name="0">
+      <transition seensym="0" writesym="b" newstate="0" move="R"/>
+      <transition seensym="b" writesym="b" newstate="0" move="R" />
+      <transition seensym="1" writesym="0" newstate="1" move="R" />
+    </state>
+    <state name="1">
+      <transition seensym="1" writesym="1" newstate="1" move="R"/>
+      <transition seensym="0" writesym="1" newstate="halt" move="R" />
+      <transition seensym="b" writesym="1" newstate="halt" move="L" />
+    </state>
+    <state name="halt">
+    </state>
+  </states>
+</turingmachine>

@@ -76,7 +76,7 @@ if __name__ == "__main__":
     # run_turing("./machines/test3-right-creator-halt-no.xml")
     # run_turing("./machines/test4-blank-in-middle.xml")
 
-    n = 1500
+    n = 3000
     # cProfile.run('''timeit.timeit('run_turing_deque("./machines/subtractor-machine.xml")',
     #                     number=10000, setup="from __main__ import run_turing_deque")''')
     print "String ",

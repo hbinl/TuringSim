@@ -9,6 +9,8 @@
             other sample turing machine (adapted into the XML format) found 
             online, but not all will work (e.g those without transition defined
             for a particular state yet when triggere]\d, will be buggy)
+
+			End
 """
 
 import timeit

@@ -167,10 +167,9 @@ class Container(Widget):
         # self.zoomed flag ensures the + and - button can only be clicked once
         # without clicking the other
 
-        if self.zoomed is False:
-            self.zoomed = True
-            mat = Matrix().scale(1.25, 1.25, 1.25)
-            self.ids.layout_states.apply_transform(mat)
+        self.zoomed = True
+        mat = Matrix().scale(1.25, 1.25, 1.25)
+        self.ids.layout_states.apply_transform(mat)
 
     #Spike4
     def zoomminus_handler(self):
@@ -178,10 +177,9 @@ class Container(Widget):
         # self.zoomed flag ensures the + and - button can only be clicked once
         # without clicking the other
 
-        if self.zoomed is True:
-            mat = Matrix().scale(0.8, 0.8, 0.8)
-            self.ids.layout_states.apply_transform(mat)
-            self.zoomed = False
+        mat = Matrix().scale(0.8, 0.8, 0.8)
+        self.ids.layout_states.apply_transform(mat)
+        self.zoomed = False
 
 
 

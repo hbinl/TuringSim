@@ -32,10 +32,10 @@ import os
 import xml.etree.ElementTree as ET
 
 # Team Spike Files
-from spike_ui_lib import *   #Spike2
-from spike_dialog import *
+from ui_lib import *   #Spike2
+from ui_dialog import *
 from savetm_toxml import *   #Spike1
-from spike_graph import SpikeMachine
+from machine_graph import SpikeMachine
 
 
 #Spike1
@@ -103,5 +103,16 @@ class BrowseFileChooserWindow(FloatLayout):
     def cancel_dialog(self):
         # used for dismissing the dialog box
         self.parent.parent.parent.dismiss()
+
+class HomeScreenWindow(FloatLayout):
+    load = ObjectProperty(None)
+    cancel = ObjectProperty(None)
+    path = None
+
+    def cancel_dialog(self):
+        # used for dismissing the dialog box
+        self.parent.parent.parent.dismiss()
+
+
 
 

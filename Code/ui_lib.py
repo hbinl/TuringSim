@@ -67,6 +67,7 @@ class UIObj_State(Widget):
         if self.menu_visible:
             self.menu_visible = False
             self.get_parent_window().children[0].ids.container_rl.remove_widget(self.menu)
+            self.get_parent_window().children[0].edit_mode_selected_state = None
         if self.collide_point(touch.x,touch.y):
 
             if self.get_parent_window().children[0].edit_mode:
@@ -78,7 +79,13 @@ class UIObj_State(Widget):
                     self.menu_visible = True
                     self.menu = UI_LongTouch_Menu(pos=touch.pos, state_ref=self)
 
+                    if self.get_parent_window().children[0].edit_mode_selected_state is not None:
+                        x = self.get_parent_window().children[0].edit_mode_selected_state.menu
+                        self.get_parent_window().children[0].ids.container_rl.remove_widget(x)
+
                     self.get_parent_window().children[0].ids.container_rl.add_widget(self.menu)
+                    self.get_parent_window().children[0].edit_mode_selected_state = self
+                    # print self.get_parent_window().children[0].edit_mode_selected_state
             return True
 
 
@@ -132,8 +139,11 @@ class UI_LongTouch_Menu(Widget):
     def delete_state(self):
         # Handler for delete state button
         if self.state_ref is not None:
+            self.get_parent_window().children[0].edit_mode_selected_state = None
             self.get_parent_window().children[0].machine.delete_state(self.state_ref.id)
             self.get_parent_window().children[0].ids.layout_states.remove_widget(self.state_ref)
+            self.get_parent_window().children[0].ids.container_rl.remove_widget(self)
+
             #print self.get_parent_window().children[0].machine.states
 
 

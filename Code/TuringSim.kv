@@ -25,35 +25,31 @@
             size_hint_y: 0.1
             pos_hint: {'y':0.9}
             orientation: 'horizontal'
-            Button:
-                id: savexml_button
-                text: "Spike1 SaveXML"
-                on_press: root.savexml_handler(self.text)
-
+            id: button_layout
             Button:
                 id: load_button
-                text: "Spike2 LoadXML"
-                on_press: root.load_handler(self.text)
+                text: "Exit to Home"
+                on_press: root.close_handler()
 
-            Button:
-                id: edit_button
-                text: "Spike3 Edit"
-                on_press: root.edit_handler(self)
+#            Button:
+#                id: savexml_button
+#                text: "Save As"
+#                on_press: root.savexml_handler(self.text)
 
             Button:
                 id: save_button
-                text: "Spike3 Save"
+                text: "Save As"
                 on_press: root.save_handler(self.text)
 
             Button:
-                id: zoom_button
-                text: "Spike4 + Zoom"
-                on_press: root.zoomplus_handler()
+                id: edit_button
+                text: "Edit"
+                on_press: root.edit_handler(self)
 
             Button:
-                id: zoomout_button
-                text: "Spike4 - Zoom"
-                on_press: root.zoomminus_handler()
+                id: zoom_button
+                text: "Zoom"
+                on_press: root.zoom_handler()
 
 
 #### DIALOGS
@@ -104,11 +100,52 @@
 
             Button:
                 text: "Cancel"
+                id: cancel_button
                 on_release: root.cancel_dialog()
 
             Button:
                 text: "Load"
                 on_release: root.load_file(filechooser.path, filechooser.selection)
+
+
+<HomeScreenWindow>:
+    RelativeLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        id: homescreenwindow
+        BoxLayout:
+            size: root.size
+            y: root.size[1]*0.5
+            #pos_hint_y: 0.2
+            size_hint_y: 0.5
+            Label:
+                text: "Welcome to TuringSim"
+
+        BoxLayout:
+
+            size_hint_y: 0.4
+
+            bcolor: 0.7, 0.7, 0.7, 1
+            canvas.before:
+                Color:
+                    rgba: self.bcolor
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            orientation: "vertical"
+            Button:
+                text: "Load from Turing Machine XML"
+                id: home_load
+
+            Button:
+                text: "Create New Deterministic Turing Machine"
+                id: home_new_dtm
+
+#            Button:
+#                text: "TODO: Create New Non-Deterministic Turing Machine"
+#                id: home_new_ndtm
 
 
 <Spike1Message>:
@@ -133,7 +170,7 @@
                 on_release: root.test2()
 
 ###################### UIObjs
-<UIObj_State@Widget>:
+<UIObj_State>:
     canvas:
         Color:
             rgba: 0.1,0.1,0.1,1
@@ -226,7 +263,7 @@
 
 <UI_LongTouch_Menu>:
     id: long_touch_menu
-    BoxLayout:
+    RelativeLayout:
         size: 200,100
         pos: 0,100
         orientation: "horizontal"

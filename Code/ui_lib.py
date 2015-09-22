@@ -253,3 +253,17 @@ class UIObj_State_Halting_Template(UIObj_State_Template):
             # Passing control over...
             touch.ungrab(self)
             touch.grab(copy)
+
+
+class UIObj_Tape_Head(Widget):
+    def on_touch_down(self, touch):
+        if self.collide_point(*touch.pos):
+            touch.grab(self)
+
+    def on_touch_move(self, touch):
+        if touch.grab_current is self:
+            self.center_x = touch.x
+
+    def on_touch_up(self, touch):
+        if touch.grab_current is self:
+            touch.ungrab(self)

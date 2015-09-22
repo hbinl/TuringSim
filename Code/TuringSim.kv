@@ -7,7 +7,7 @@
         id: container_rl
 
         BoxLayout:
-            size_hint_y: 0.85
+            size_hint_y: 0.8
             pos_hint: {'y':0}
 
             ScatterLayout:
@@ -21,45 +21,128 @@
                         pos: self.pos
                         size: self.size
 
+
+
         BoxLayout:
-            size_hint_y: 0.1
-            pos_hint: {'y':0.9}
+            size_hint_y: 0.05
+            pos_hint: {'y':0.95}
             orientation: 'horizontal'
             id: button_layout
             Button:
-                id: load_button
-                text: "Exit to Home"
-                on_press: root.close_handler()
-
-#            Button:
-#                id: savexml_button
-#                text: "Save As"
-#                on_press: root.savexml_handler(self.text)
+                id: close_button
+                text: "Close"
+                on_release: root.close_handler()
+                background_color: (1,0.1,0.1,1)
+                font_size: 25
 
             Button:
                 id: save_button
                 text: "Save As"
-                on_press: root.save_handler(self.text)
+                on_release: root.save_handler(self.text)
+                font_size: 25
 
             Button:
                 id: edit_button
                 text: "Edit"
-                on_press: root.edit_handler(self)
+                on_release: root.edit_handler(self)
+                font_size: 25
+
+            BoxLayout:
+                size: (30,5)
 
             Button:
                 id: zoom_button_plus
-                text: "Zoom In (+)"
-                on_press: root.zoom_handler(self.text)
+                text: "Zoom In"
+                on_release: root.zoom_handler(self.text)
+                background_color: (0.3,0.3,0.3,1)
+                font_size: 25
 
             Button:
                 id: zoom_button_actual
-                text: "Original Size"
-                on_press: root.zoom_reset()
+                text: "Original"
+                on_release: root.zoom_reset()
+                background_color: (0.3,0.3,0.3,1)
+                font_size: 25
 
             Button:
                 id: zoom_button_minus
-                text: "Zoom Out (-)"
-                on_press: root.zoom_handler(self.text)
+                text: "Zoom Out"
+                on_release: root.zoom_handler(self.text)
+                background_color: (0.3,0.3,0.3,1)
+                font_size: 25
+
+            Button:
+                id: play_button
+                text: "PLAY"
+                on_release: root.zoom_handler(self.text)
+                background_color: (0.5,0.8,0.5,1)
+                font_size: 25
+
+
+            Button:
+                id: stop_button
+                text: "STOP"
+                on_release: root.zoom_handler(self.text)
+                background_color: (0.5,0.8,0.5,1)
+                font_size: 25
+            BoxLayout:
+                size: (10,5)
+            Button:
+                id: about_button
+                text: "About"
+                on_release: root.about_handler()
+                font_size: 25
+
+
+        RelativeLayout:
+            id: tape_layout
+            size_hint_y: 0.05
+            size_hint_x:0.6
+            pos_hint: {'y':0.87, 'x':0.2}
+            orientation: 'horizontal'
+            Button:
+                pos_hint: {'x':0}
+                size_hint_x: 0.1
+                text: "<"
+            BoxLayout:
+                pos_hint: {'x':0.11}
+                size_hint_x: 0.75
+                orientation: 'horizontal'
+                canvas.before:
+                    Color:
+                        rgba: 1,1,1,1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size[0]+6, self.size[1]+6
+
+                    Color:
+                        rgba: 0,0,0,1
+                    Rectangle:
+                        pos: self.pos[0]+3, self.pos[1]+3
+                        #size: root.size[0], 60
+                        size: self.size
+
+                Label:
+                    text: "#  0  1  0  1  0  1  1  0  1  1  0  1  0  0  1  #  #  #"
+
+            Button:
+                pos_hint: {'x':0.88}
+                size_hint_x: 0.1
+                text: ">"
+
+        UIObj_Tape_Head:
+            size_hint: (0.05,0.1)
+            pos_hint: {'y': 0.865}
+            center_x: root.size[1] * 0.43
+
+
+<UIObj_Tape_Head>:
+    canvas:
+        Line:
+
+            width: 3
+            points: self.x+10, self.y+10,self.x+30, self.y+10, self.x+20, self.y+15, self.x+10, self.y+10
+
 
 
 #### DIALOGS
@@ -129,11 +212,15 @@
             y: root.size[1]*0.5
             #pos_hint_y: 0.2
             size_hint_y: 0.5
+            orientation: "vertical"
             Label:
-                text: "Welcome to TuringSim"
+                text: "Welcome to TuringSim - Iteration 1"
+            Label:
+                text:"TuringSim v0.1 by Loh Hao Bin, Ashley Ong Yik Mun & Varshinee Servansingh"
+            Label:
+                text:"FIT3140 Advanced Programming, Semester 2, 2015"
 
         BoxLayout:
-
             size_hint_y: 0.4
 
             bcolor: 0.7, 0.7, 0.7, 1

@@ -1,11 +1,1 @@
-<turingmachine>
-  <alphabet>0123b</alphabet>
-  <initialtape>1010101</initialtape>
-  <blank char="b" />
-  <initialstate name="0" />
-  <finalstates>
-    <finalstate name="halt" />
-  </finalstates>
-  <states>
-    <state name="halt908.0" /><state name="halt872.0" /><state name="halt846.0" /><state name="new686.0" /><state name="new702.0" /><state name="0" /><state name="2" /><state name="new746.0" /><state name="new734.0" /><state name="new714.0" /></states>
-</turingmachine>
+<turingmachine><alphabet /><initialtape /><blank char="" /><initialstate /><finalstates><finalstate /></finalstates><states><state name="halt840.0" /></states></turingmachine>

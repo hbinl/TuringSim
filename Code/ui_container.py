@@ -45,12 +45,11 @@ class Container(Widget):
         #Spike3
         # Initialising edit mode flag
         self.edit_mode = False
+        self.edit_mode_selected_state = None
         self._popup = None
 
-        #Spike4
         # Initialise variables for use with Scatterlayout, setting maximum/min scaling,
         # Disabling single finger move canvas, disabling rotation
-        self.zoomed = False
         Window.clearcolor = (0.7, 0.7, 0.7, 1)
         self.ids.layout_states.scale_max = 3.05175
         self.ids.layout_states.scale_min = 0.32768
@@ -60,7 +59,7 @@ class Container(Widget):
 
         self.home_screen(self)
 
-        self.edit_mode_selected_state = None
+
 
     def home_screen(self, obj):
         if self._popup is not None:
@@ -77,7 +76,7 @@ class Container(Widget):
         # new_ndtm_button = self.home_popup.content.ids.home_new_ndtm
 
         load_button.bind(on_release=self.load_handler)
-        new_dtm_button.bind(on_release=self.home_popup.dismiss)
+        new_dtm_button.bind(on_release=self.create_new_handler)
 
         print "home"
         # # Assign handler on dismiss
@@ -87,8 +86,12 @@ class Container(Widget):
         Clock.schedule_once(self.home_popup.open, 0.5)
         #self.home_popup.open()
 
+    def create_new_handler(self, obj):
+        self.reset_container()
+        self.edit_mode_controller(True)
+        self.home_popup.dismiss()
 
-    def load_handler(self, text):
+    def load_handler(self, obj):
         # Purpose: Shows a file browser dialog for user to pick an XML file
 
         self._popup = Popup(title="Load a Turing Machine XML File",
@@ -97,10 +100,16 @@ class Container(Widget):
 
         # Assign handler on dismiss
         self._popup.bind(on_dismiss=self.after_load_handler)
-        self._popup.content.ids.cancel_button.bind(on_release=self.home_screen)
+        self._popup.content.ids.cancel_button.bind(on_release=self._popup.dismiss)
 
         # Reveal dialog
         self._popup.open()
+
+    def reset_container(self):
+        self.zoom_reset()
+        #self.edit_mode_controller(False)
+        self.ids.layout_states.pos = (0,0)
+        self.ids.layout_states.clear_widgets()
 
     def after_load_handler(self, obj):
         # Purpose: To handle loading file and data from XML file
@@ -110,19 +119,16 @@ class Container(Widget):
             self.home_popup.dismiss()
 
             # Initialising UI variables, clearing canvas and setting the stage
-            self.zoom_reset()
-            self.edit_mode = False
+            self.reset_container()
             board = self.ids.layout_states
-            board.pos = (0,0)
-            board.clear_widgets()
 
             # Initialising appearance variables for States
             i = 0
             win_x, win_y = Window.size
-            start = 150
+            start = 100
             state_size = 100
             padding = 80
-            y_hint = 0.2
+            y_hint = 0.1
             state_size = 100
 
             # reading from XML file
@@ -314,11 +320,11 @@ class Container(Widget):
 
 
     def zoom_handler(self, text):
-        if text == "Zoom In (+)":
+        if text == "Zoom In":
             if self.ids.layout_states.scale < 3.05175:
                 mat = Matrix().scale(1.25,1.25,1.25)
                 self.ids.layout_states.apply_transform(mat)
-        elif text == "Zoom Out (-)":
+        elif text == "Zoom Out":
             if self.ids.layout_states.scale > 0.32768:
                 mat = Matrix().scale(0.8,0.8,0.8)
                 self.ids.layout_states.apply_transform(mat)
@@ -332,6 +338,34 @@ class Container(Widget):
         mat = Matrix().scale(factor, factor, factor)
         self.ids.layout_states.apply_transform(mat)
 
+
+    def about_handler(self):
+        content = BoxLayout(orientation="vertical")
+
+        content.add_widget(Label(text="TuringSim v0.1, \nby Loh Hao Bin, Ashley Ong Yik Mun & Varshinee Servansingh\nFIT3140 Advanced Programming, Semester 2, 2015"))
+
+        # content_box = BoxLayout(orientation="horizontal")
+        #
+        # ok_button = Button(text="Yes")
+        # content_box.add_widget(ok_button)
+        #
+        # cancel_button = Button(text="No")
+        # content_box.add_widget(cancel_button)
+        #
+        # content.add_widget(content_box)
+
+        self._popup = Popup(title="About TuringSim",
+                            content=content,
+                            size_hint=(0.6, 0.3))
+
+        # ok_button.bind(on_release=self.home_screen)
+        # cancel_button.bind(on_release=self._popup.dismiss)
+        #
+        # if self.edit_mode is True:
+        #     self.edit_mode_controller(False)
+
+        # Reveal dialog
+        self._popup.open()
 
 
 

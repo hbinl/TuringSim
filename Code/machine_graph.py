@@ -22,3 +22,5 @@ class SpikeMachine():
 
     def modify_state(self,original_id,new_id):
         pass
+
+

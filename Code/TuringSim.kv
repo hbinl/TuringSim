@@ -47,9 +47,19 @@
                 on_press: root.edit_handler(self)
 
             Button:
-                id: zoom_button
-                text: "Zoom"
-                on_press: root.zoom_handler()
+                id: zoom_button_plus
+                text: "Zoom In (+)"
+                on_press: root.zoom_handler(self.text)
+
+            Button:
+                id: zoom_button_actual
+                text: "Original Size"
+                on_press: root.zoom_reset()
+
+            Button:
+                id: zoom_button_minus
+                text: "Zoom Out (-)"
+                on_press: root.zoom_handler(self.text)
 
 
 #### DIALOGS
@@ -256,8 +266,7 @@
             pos: (150,0)
             size: (300,100)
             size_hint: (None, None)
-    BoxLayout:
-        id: delete
+
 
 
 

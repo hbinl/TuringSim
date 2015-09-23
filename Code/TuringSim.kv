@@ -24,10 +24,11 @@
 
 
         BoxLayout:
-            size_hint_y: 0.05
-            pos_hint: {'y':0.95}
+            size_hint_y: 0.08
+            pos_hint: {'y':0.92}
             orientation: 'horizontal'
             id: button_layout
+            padding: 10
             Button:
                 id: close_button
                 text: "Close"
@@ -41,14 +42,10 @@
                 on_release: root.save_handler(self.text)
                 font_size: 25
 
-            Button:
-                id: edit_button
-                text: "Edit"
-                on_release: root.edit_handler(self)
-                font_size: 25
 
-            BoxLayout:
-                size: (30,5)
+
+#            BoxLayout:
+#                size: (30,5)
 
             Button:
                 id: zoom_button_plus
@@ -85,8 +82,14 @@
                 on_release: root.zoom_handler(self.text)
                 background_color: (0.5,0.8,0.5,1)
                 font_size: 25
-            BoxLayout:
-                size: (10,5)
+#            BoxLayout:
+#                size: (10,5)
+
+            Button:
+                id: edit_button
+                text: "Edit"
+                on_release: root.edit_handler(self)
+                font_size: 25
             Button:
                 id: about_button
                 text: "About"
@@ -96,14 +99,14 @@
 
         RelativeLayout:
             id: tape_layout
-            size_hint_y: 0.05
+            size_hint_y: 0.07
             size_hint_x:0.6
-            pos_hint: {'y':0.87, 'x':0.2}
+            pos_hint: {'y':0.84, 'x':0.2}
             orientation: 'horizontal'
-            Button:
-                pos_hint: {'x':0}
-                size_hint_x: 0.1
-                text: "<"
+#            Button:
+#                pos_hint: {'x':0}
+#                size_hint_x: 0.1
+#                text: "<"
             BoxLayout:
                 pos_hint: {'x':0.11}
                 size_hint_x: 0.75
@@ -123,17 +126,17 @@
                         size: self.size
 
                 Label:
-                    text: "#  0  1  0  1  0  1  1  0  1  1  0  1  0  0  1  #  #  #"
+                    text: "#  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #"
 
-            Button:
-                pos_hint: {'x':0.88}
-                size_hint_x: 0.1
-                text: ">"
+#            Button:
+#                pos_hint: {'x':0.88}
+#                size_hint_x: 0.1
+#                text: ">"
 
         UIObj_Tape_Head:
             size_hint: (0.05,0.1)
-            pos_hint: {'y': 0.865}
-            center_x: root.size[1] * 0.43
+            pos_hint: {'y': 0.84}
+            center_x: root.size[1] * 0.41
 
 
 <UIObj_Tape_Head>:
@@ -337,37 +340,70 @@
 
 # UI MENUS AND TOOLBARS
 <UIObj_Edit>:
-    pos: (0,-100)
-    canvas.before:
-        Color:
-            rgba: 0.1,0.1,0.1,0.7
-        Rectangle:
-            pos: self.pos
-            size: (10000,100)
-    RelativeLayout:
+#    pos: (0,-100)
+#    canvas.before:
+#        Color:
+#            rgba: 0.1,0.1,0.1,0.7
+#        Rectangle:
+#            pos: self.pos
+#            size: (10000,100)
+    BoxLayout:
         id: temp_layout
         padding: 10
         orientation: "horizontal"
-        Label:
-            text: "Edit Mode: Drag to Add New States \nClick state to show menu"
-            pos: (150,0)
-            size: (300,100)
-            size_hint: (None, None)
-
-
-
-
-<UI_LongTouch_Menu>:
-    id: long_touch_menu
-    RelativeLayout:
-        size: 200,100
-        pos: 0,100
-        orientation: "horizontal"
+        size: root.size
 
         Button:
+            id: add_button
+            text: "Add State.."
+            on_release: root.add_state()
+            font_size: 25
+
+        Button:
+            id: add_tran_button
+            text: "Add Transitions.."
+            on_release: root.add_transitions()
+            font_size: 25
+
+        Button:
+            id: del_button
             text: "Delete State"
             on_release: root.delete_state()
+            font_size: 25
 
+        Button:
+            id: make_initial_button
+            text: "Make Starting"
+            on_release: root.make_initial_state()
+            font_size: 25
+
+        Button:
+            id: make_halting_button
+            text: "Make Halting"
+            on_release: root.make_halting_state()
+            font_size: 25
+
+        Button:
+            id: set_tape_button
+            text: "Set Tape.."
+            on_release: root.set_tape()
+            font_size: 25
+
+
+
+
+#<UI_LongTouch_Menu>:
+#    id: long_touch_menu
+#    RelativeLayout:
+#        size: 200,100
+#        pos: 0,100
+#        orientation: "horizontal"
+#
+#        Button:
+#            id: del_button
+#            text: "Delete State"
+#            on_release: root.delete_state()
+#            font_size: 25
 
 
 

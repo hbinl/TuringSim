@@ -1,36 +1,48 @@
-__author__ = 'HaoBin'
+"""
+@title FIT3140 Assignment 5
+@description Sprint 1
+@author Loh Hao Bin, Ashley Ong Yik Mun, Varshinee Devi Servansingh
+@date 1/9/2015
+"""
 
 # Kivy Dependencies
-from kivy.app import App
-from kivy.uix.widget import Widget
-from kivy.graphics import *
-from kivy.uix.label import Label
-from kivy.properties import ObjectProperty
 from kivy.uix.button import Button
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.relativelayout import RelativeLayout
-from kivy.factory import Factory
-from kivy.uix.popup import Popup
-from kivy.core.window import Window
-from kivy.graphics import *
-from kivy.uix.label import Label
 from kivy.graphics.transformation import Matrix
-from kivy.animation import Animation
 from kivy.clock import Clock
 
-# Python Libraries
-import os
-import xml.etree.ElementTree as ET
 
-# Team Spike Files
-from ui_lib import *   #Spike2
 from ui_dialog import *
-from savetm_toxml import *   #Spike1
-from machine_graph import SpikeMachine
+from ui_edit import *
+from savetm_toxml import *
+#from machine_graph import Machine
+
 
 
 class Container(Widget):
+
+    class Machine():
+        def __init__(self):
+            self.states = {}
+            self.transitions = {}
+
+        def add_state(self, id, reference):
+            self.states[id] = reference
+
+        def delete_state(self, id):
+            del self.states[id]
+
+        def add_transition(self, origin, destination):
+            #TODO: Transitions not needed for A3
+            pass
+
+        def delete_transition(self, origin, destination):
+            #TODO: Transitions not needed for A3
+            pass
+
+        def modify_state(self,original_id,new_id):
+            pass
+
+
     """
     @purpose Main container class, containing various general UI handlers
     """
@@ -39,10 +51,9 @@ class Container(Widget):
         super(Container, self).__init__(**kwargs)
 
         # Initialise SpikeMachine class used to keep track of states
-        self.machine = SpikeMachine()
+        self.machine = self.Machine()
         self.xml_tree = None
 
-        #Spike3
         # Initialising edit mode flag
         self.edit_mode = False
         self.edit_mode_selected_state = None
@@ -65,7 +76,6 @@ class Container(Widget):
         if self._popup is not None:
             self._popup.dismiss()
 
-
         self.home_popup = Popup(title="Turing Machine Simulator",
                             content=HomeScreenWindow(),
                             size_hint=(1, 1),
@@ -79,12 +89,10 @@ class Container(Widget):
         new_dtm_button.bind(on_release=self.create_new_handler)
 
         print "home"
-        # # Assign handler on dismiss
-        # self.home_popup.bind(on_dismiss=self.after_load_handler)
 
         # Reveal dialog
         Clock.schedule_once(self.home_popup.open, 0.5)
-        #self.home_popup.open()
+
 
     def create_new_handler(self, obj):
         self.reset_container()
@@ -107,7 +115,6 @@ class Container(Widget):
 
     def reset_container(self):
         self.zoom_reset()
-        #self.edit_mode_controller(False)
         self.ids.layout_states.pos = (0,0)
         self.ids.layout_states.clear_widgets()
 
@@ -165,29 +172,46 @@ class Container(Widget):
 
                 # # TODO_FUTURE TRANSITION STUFFS
                 # transition = UIObj_Transition(tid=str(child.attrib["name"]),
-                #                               origin_x=x_pos+(state_size/2),origin_y=y_pos+(state_size/2),
-                #                               end_x=x_pos*2, end_y=y_pos*2,
-                #                               width=transition_width,
-                #                               curve_factor=25,
-                #                               is_self_state=False)
+                #                               start=1
+                #                               )
                 # board.add_widget(transition)
                 # print self.machine.states
 
+    def create_state(self, name, halting):
 
+        # Initialising appearance variables for States
+        i = 0
+        win_x, win_y = Window.size
+        start = 100
+        state_size = 100
+        padding = 80
+        y_hint = 0.1
+        state_size = 100
+
+        # reading from XML file
+
+
+
+        board = self.ids.layout_states
+        if halting is True:
+            pass
+        else:
+            state = UIObj_State(id=str(name),
+                                                x = 150,
+                                                y = 150,
+                                                size=(state_size,state_size))
+
+            board.add_widget(state)
 
     def close_handler(self):
         content = BoxLayout(orientation="vertical")
-
         content.add_widget(Label(text="Are you sure you want to close the TM?"))
-
         content_box = BoxLayout(orientation="horizontal")
 
         ok_button = Button(text="Yes")
-        content_box.add_widget(ok_button)
-
         cancel_button = Button(text="No")
+        content_box.add_widget(ok_button)
         content_box.add_widget(cancel_button)
-
         content.add_widget(content_box)
 
         self._popup = Popup(title="Return to Home",
@@ -205,18 +229,6 @@ class Container(Widget):
         self._popup.open()
 
 
-    #Spike1
-    def savexml_handler(self, text):
-        # Method used to test Spike 1, which is to test ability to save XML files
-
-        self._popup = Popup(title="Spike 1 Save XML",
-                            content=Spike1Message(),
-                            size_hint=(0.9,0.3))
-        self._popup.open()
-
-
-
-    #Spike3
     def save_handler(self, text):
         #Handler for Spike3 save button, saves the customised Turing machine to xml
 
@@ -265,10 +277,8 @@ class Container(Widget):
 
 
 
-    #Spike3
     def edit_handler(self, button):
         # Handles the edit button click
-
         # Condition checks if we are currently in edit mode
         if self.edit_mode is True:
             self.edit_mode_controller(False)
@@ -298,7 +308,6 @@ class Container(Widget):
             if button is not None:
                 button.text = "Done"
 
-
             self.edit_mode = True
 
             # Shows the customisation toolbar
@@ -307,15 +316,15 @@ class Container(Widget):
             anim = Animation(x=0, y=0, duration=0.2)
             anim.start(bl)
 
-            # Adds template objects to customisation toolbar
-            bl.add_widget(UIObj_State_Template(id="State",
-                                               x = 600,
-                                               y = 10,
-                                               size=(100,100)))
-            bl.add_widget(UIObj_State_Halting_Template(id="Halt",
-                                                       x=760,
-                                                       y=10,
-                                                       size =(100,100)))
+            # # Adds template objects to customisation toolbar
+            # bl.add_widget(UIObj_State_Template(id="State",
+            #                                    x = 600,
+            #                                    y = 10,
+            #                                    size=(100,100)))
+            # bl.add_widget(UIObj_State_Halting_Template(id="Halt",
+            #                                            x=760,
+            #                                            y=10,
+            #                                            size =(100,100)))
 
 
 
@@ -330,7 +339,6 @@ class Container(Widget):
                 self.ids.layout_states.apply_transform(mat)
 
 
-
     def zoom_reset(self):
         self.ids.layout_states.pos = [0,0]
         self.zoom_counter = 0
@@ -341,30 +349,12 @@ class Container(Widget):
 
     def about_handler(self):
         content = BoxLayout(orientation="vertical")
-
         content.add_widget(Label(text="TuringSim v0.1, \nby Loh Hao Bin, Ashley Ong Yik Mun & Varshinee Servansingh\nFIT3140 Advanced Programming, Semester 2, 2015"))
-
-        # content_box = BoxLayout(orientation="horizontal")
-        #
-        # ok_button = Button(text="Yes")
-        # content_box.add_widget(ok_button)
-        #
-        # cancel_button = Button(text="No")
-        # content_box.add_widget(cancel_button)
-        #
-        # content.add_widget(content_box)
 
         self._popup = Popup(title="About TuringSim",
                             content=content,
                             size_hint=(0.6, 0.3))
 
-        # ok_button.bind(on_release=self.home_screen)
-        # cancel_button.bind(on_release=self._popup.dismiss)
-        #
-        # if self.edit_mode is True:
-        #     self.edit_mode_controller(False)
-
-        # Reveal dialog
         self._popup.open()
 
 

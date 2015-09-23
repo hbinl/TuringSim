@@ -1,7 +1,6 @@
-
 # SpikeMachine, a simple class used to keep track of the current Turing Machine in memory
 
-class SpikeMachine():
+class Machine():
     def __init__(self):
         self.states = {}
         self.transitions = {}

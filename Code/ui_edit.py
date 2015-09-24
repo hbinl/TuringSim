@@ -20,9 +20,8 @@ class UIObj_Edit(Widget):
         pass
 
     def add_state(self):
-        print "X"
         content = BoxLayout(orientation="vertical")
-        textinput = TextInput(text='State1', multiline=False)
+        textinput = TextInput(text='State1', multiline=False, id='textinput')
         button = Button(text="Add State")
         content.add_widget(textinput)
         content.add_widget(button)
@@ -30,27 +29,33 @@ class UIObj_Edit(Widget):
         self._popup = Popup(title="Enter New Transition Name",
                             content=content,
                             size_hint=(0.3, 0.3))
-        textinput.bind(on_text_validate=self.on_enter)
-        button.bind(on_release=self.on_ok_button)
+        textinput.bind(on_text_validate=self.on_enter_add)
+        button.bind(on_release=self.on_ok_button_add)
         self._popup.open()
 
-    def on_enter(self, value):
+    def on_enter_add(self, value):
         halting = False
+
         self.add_state_handler(self._popup.content.children[1].text, halting)
 
-    def on_ok_button(self, value):
+    def on_ok_button_add(self, value):
         halting = False
         self.add_state_handler(self._popup.content.children[1].text, halting)
 
     def add_state_handler(self, name, halting):
-        self.parent.create_state(name, halting)
-        self._popup.dismiss()
+        try:
+            self.parent.create_state(name, halting)
+            self._popup.dismiss()
+        except Exception:
+            self._popup.title = "Name Error"
+            self._popup.content.children[1].text = ""
 
     def add_tran_button(self):
         pass
 
     def delete_state(self):
-        pass
+        self.get_parent_window().children[0].remove_selected_state()
+
 
     def make_initial_state(self):
         pass
@@ -61,28 +66,28 @@ class UIObj_Edit(Widget):
     def set_tape(self):
         pass
 
-
-class UI_LongTouch_Menu(Widget):
-    # Object for the State Menu items in Edit Mode
-    # Allowing the user to delete and customise states
-    menu = ObjectProperty(None)
-
-    def __init__(self, **kwargs):
-        self.pos = kwargs.get('pos',(100,0))
-        self.state_ref = kwargs.get('state_ref',None)
-
-        super(UI_LongTouch_Menu,self).__init__(**kwargs)
-        #self.ids.del_button.text = "Delete" + self.state_ref.id
-
-    def delete_state(self):
-        # Handler for delete state button
-        if self.state_ref is not None:
-            self.get_parent_window().children[0].edit_mode_selected_state = None
-            self.get_parent_window().children[0].machine.delete_state(self.state_ref.id)
-            self.get_parent_window().children[0].ids.layout_states.remove_widget(self.state_ref)
-            self.get_parent_window().children[0].ids.container_rl.remove_widget(self)
-
-            #print self.get_parent_window().children[0].machine.states
+#
+# class UI_LongTouch_Menu(Widget):
+#     # Object for the State Menu items in Edit Mode
+#     # Allowing the user to delete and customise states
+#     menu = ObjectProperty(None)
+#
+#     def __init__(self, **kwargs):
+#         self.pos = kwargs.get('pos',(100,0))
+#         self.state_ref = kwargs.get('state_ref',None)
+#
+#         super(UI_LongTouch_Menu,self).__init__(**kwargs)
+#         #self.ids.del_button.text = "Delete" + self.state_ref.id
+#
+#     def delete_state(self):
+#         # Handler for delete state button
+#         if self.state_ref is not None:
+#             self.get_parent_window().children[0].edit_mode_selected_state = None
+#             self.get_parent_window().children[0].machine.delete_state(self.state_ref.id)
+#             self.get_parent_window().children[0].ids.layout_states.remove_widget(self.state_ref)
+#             self.get_parent_window().children[0].ids.container_rl.remove_widget(self)
+#
+#             #print self.get_parent_window().children[0].machine.states
 
 
 # class UIObj_State_Template(UIObj_State):

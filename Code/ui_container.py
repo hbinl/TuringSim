@@ -15,7 +15,7 @@ from ui_dialog import *
 from ui_edit import *
 from savetm_toxml import *
 #from machine_graph import Machine
-
+#from class_turing_deque import Transition, State
 
 
 class Container(Widget):
@@ -26,10 +26,20 @@ class Container(Widget):
             self.transitions = {}
 
         def add_state(self, id, reference):
-            self.states[id] = reference
+            try:
+                print self.states[id]
+                raise Exception("State already exists.")
+            except KeyError:
+                self.states[id] = reference
+                print self.states
+
+
 
         def delete_state(self, id):
             del self.states[id]
+
+        def get_num_states(self):
+            return len(self.states)
 
         def add_transition(self, origin, destination):
             #TODO: Transitions not needed for A3
@@ -70,9 +80,40 @@ class Container(Widget):
 
         self.home_screen(self)
 
+        self.state_size = (100,100)
+        self.state_x_pos = 100
+        self.state_y_pos = 100
+        self.state_y_hint = 0.1
+
+
+    def select(self, new):
+        edit_bar = self.children[0]
+        if self.edit_mode is True:
+            if new is None:
+                self.edit_mode_selected_state = None
+                edit_bar.ids.del_button.text = "Delete State"
+                edit_bar.ids.make_initial_button.text = "Make Starting"
+                edit_bar.ids.make_halting_button.text = "Make Halting"
+            else:
+                if self.edit_mode_selected_state is not None:
+                    self.edit_mode_selected_state.selection(False)
+                self.edit_mode_selected_state = new
+                edit_bar.ids.del_button.text = "Delete " + new.id
+                edit_bar.ids.make_initial_button.text = "Make " + new.id + " Starting"
+                edit_bar.ids.make_halting_button.text = "Make " + new.id + " Halting"
+
+
+
+    def remove_selected_state(self):
+        if self.edit_mode_selected_state is not None:
+            name = self.edit_mode_selected_state.id
+            self.machine.delete_state(name)
+            self.ids.layout_states.remove_widget(self.edit_mode_selected_state)
+            self.select(None)
 
 
     def home_screen(self, obj):
+
         if self._popup is not None:
             self._popup.dismiss()
 
@@ -99,6 +140,7 @@ class Container(Widget):
         self.edit_mode_controller(True)
         self.home_popup.dismiss()
 
+
     def load_handler(self, obj):
         # Purpose: Shows a file browser dialog for user to pick an XML file
 
@@ -114,6 +156,7 @@ class Container(Widget):
         self._popup.open()
 
     def reset_container(self):
+        self.reset_state_pos()
         self.zoom_reset()
         self.ids.layout_states.pos = (0,0)
         self.ids.layout_states.clear_widgets()
@@ -129,15 +172,6 @@ class Container(Widget):
             self.reset_container()
             board = self.ids.layout_states
 
-            # Initialising appearance variables for States
-            i = 0
-            win_x, win_y = Window.size
-            start = 100
-            state_size = 100
-            padding = 80
-            y_hint = 0.1
-            state_size = 100
-
             # reading from XML file
             xml_tree = ET.parse(obj.content.path)
             self.xml_tree = xml_tree
@@ -145,63 +179,59 @@ class Container(Widget):
 
             # Start looping through the XML file
             for child in xml_states:
-                # Calculate position for the state to appear in
-                x_pos = start+(i*(state_size+padding))
-                if x_pos > Window.size[0]:
-                    i = 0
-                    x_pos = start+(i*(state_size+padding))
-                    y_hint += 0.1
-                y_pos = win_y*y_hint
-
                 # If halt, create halt object, else create ordinary state object
                 if child.attrib["name"] == "halt":
-                    state = UIObj_State_Halting(id=str(child.attrib["name"]),
-                                                x = x_pos,
-                                                y = y_pos,
-                                                size=(state_size,state_size))
+                    self.create_state(child.attrib["name"], True)
                 else:
-                    state = UIObj_State(id=str(child.attrib["name"]),
-                                        x = x_pos,
-                                        y = y_pos,
-                                        size=(state_size,state_size))
+                    self.create_state(child.attrib["name"], False)
 
                 # Add the states to the canvas, and keep track of states in memory
-                self.machine.add_state(str(child.attrib["name"]),state)
-                board.add_widget(state)
-                i += 1
 
-                # # TODO_FUTURE TRANSITION STUFFS
-                # transition = UIObj_Transition(tid=str(child.attrib["name"]),
-                #                               start=1
-                #                               )
-                # board.add_widget(transition)
-                # print self.machine.states
+    def reset_state_pos(self):
+        self.state_y_pos = 100
+        self.state_x_pos = 100
+        self.state_y_hint = 0.1
+
+    def update_state_pos(self):
+        win_x, win_y = Window.size
+        padding = 70
+        self.state_x_pos += (self.state_size[0]+padding)
+        if self.state_x_pos > Window.size[0]:
+            self.state_x_pos = 100  #+((self.state_size[0]+padding))
+            self.state_y_hint += 0.1
+            self.state_y_pos = win_y*self.state_y_hint
 
     def create_state(self, name, halting):
-
         # Initialising appearance variables for States
-        i = 0
-        win_x, win_y = Window.size
-        start = 100
-        state_size = 100
-        padding = 80
-        y_hint = 0.1
-        state_size = 100
+        if len(name) > 0:
+            board = self.ids.layout_states
+            if halting is True:
+                state = UIObj_State_Halting(id=str(name),
+                                                    x = self.state_x_pos,
+                                                    y = self.state_y_pos,
+                                                    size=self.state_size)
+            else:
+                state = UIObj_State(id=str(name),
+                                                    x = self.state_x_pos,
+                                                    y = self.state_y_pos,
+                                                    size=self.state_size)
 
-        # reading from XML file
-
-
-
-        board = self.ids.layout_states
-        if halting is True:
-            pass
-        else:
-            state = UIObj_State(id=str(name),
-                                                x = 150,
-                                                y = 150,
-                                                size=(state_size,state_size))
-
+            self.machine.add_state(str(name),state)
             board.add_widget(state)
+            self.update_state_pos()
+
+                            # # TODO_FUTURE TRANSITION STUFFS
+                    # transition = UIObj_Transition(tid=str(child.attrib["name"]),
+                    #                               start=1
+                    #                               )
+                    # board.add_widget(transition)
+                    # print self.machine.states
+        else:
+            raise Exception
+
+
+
+
 
     def close_handler(self):
         content = BoxLayout(orientation="vertical")
@@ -316,15 +346,6 @@ class Container(Widget):
             anim = Animation(x=0, y=0, duration=0.2)
             anim.start(bl)
 
-            # # Adds template objects to customisation toolbar
-            # bl.add_widget(UIObj_State_Template(id="State",
-            #                                    x = 600,
-            #                                    y = 10,
-            #                                    size=(100,100)))
-            # bl.add_widget(UIObj_State_Halting_Template(id="Halt",
-            #                                            x=760,
-            #                                            y=10,
-            #                                            size =(100,100)))
 
 
 

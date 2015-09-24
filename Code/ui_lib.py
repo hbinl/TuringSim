@@ -39,18 +39,25 @@ class UIObj_State(Widget):
     """
     state = ObjectProperty(None)
 
+
     def __init__(self, **kwargs):
         # initialising some basic information about the states
+
+
+        self.transitions = {}
+        self.selected = False
+
         self.ishalt = False
         self.menu_visible = False
+
         self.size_hint_y = 0
         self.size_hint_x = 0
-        self.selected = False
         self.size= kwargs.get('size',0)
         self.x = kwargs.get('x',0)
         self.y = kwargs.get('y',0)
         self.id = kwargs.get('id',0)
         super(UIObj_State,self).__init__(**kwargs)
+
 
         # Adding name label to the state
         self.add_widget(Label(text=str(self.id),
@@ -59,39 +66,21 @@ class UIObj_State(Widget):
                               size_hint=(None, None)))
 
 
-
-
-
     def on_touch_down(self, touch):
         # handler for touch events, using collide point to check if inside State boundary
-        if self.menu_visible:
-            self.menu_visible = False
-            self.get_parent_window().children[0].ids.container_rl.remove_widget(self.menu)
-            self.get_parent_window().children[0].edit_mode_selected_state = None
-        if self.collide_point(touch.x,touch.y):
 
+        if self.collide_point(touch.x,touch.y):
             if self.get_parent_window().children[0].edit_mode:
                 touch.grab(self)
-                print("Creating Transitions")
+                print("Grabbed", self.id)
                 if self.selected is False:
-                    self.children[0].text = str(self.id + "*")
-                    self.selected = True
+                    self.selection(True)
                 else:
-                    self.children[0].text = str(self.id)
-                    self.selected = False
+                    self.selection(False)
 
-                if self.menu_visible is False:
-                    self.menu_visible = True
-                    self.menu = ui_edit.UI_LongTouch_Menu(pos=touch.pos, state_ref=self)
-
-                    if self.get_parent_window().children[0].edit_mode_selected_state is not None:
-                        x = self.get_parent_window().children[0].edit_mode_selected_state.menu
-                        self.get_parent_window().children[0].ids.container_rl.remove_widget(x)
-
-                    self.get_parent_window().children[0].ids.container_rl.add_widget(self.menu)
-                    self.get_parent_window().children[0].edit_mode_selected_state = self
-                    # print self.get_parent_window().children[0].edit_mode_selected_state
             return True
+        else:
+            self.selection(False)
 
 
     def on_touch_move(self, touch):
@@ -107,7 +96,33 @@ class UIObj_State(Widget):
             touch.ungrab(self)
 
 
-#Spike2
+    def is_halt(self):
+        return self.halting
+
+    def add_transition(self, end, seen, write, move):
+        try:
+            self.transitions[seen] += Transition(self.id, end, seen, write, move)
+
+        except KeyError:
+            self.transitions[seen] = [Transition(self.id, end, seen, write, move)]
+
+    def get_transition_seen(self, seen):
+        try:
+            return self.transitions[seen]
+        except KeyError:
+            return []
+
+    def selection(self, bool):
+        if bool is True:
+            self.selected = True
+            self.children[0].text = str(self.id + "*")
+            self.get_parent_window().children[0].select(self)
+        else:
+            self.selected = False
+            self.children[0].text = str(self.id)
+            self.get_parent_window().children[0].select(None)
+
+
 class UIObj_State_Halting(UIObj_State):
     """
     @purpose UI Object class for Halting States' visual representation, based
@@ -121,6 +136,7 @@ class UIObj_State_Halting(UIObj_State):
     def __init__(self, **kwargs):
         super(UIObj_State_Halting,self).__init__(**kwargs)
         self.ishalt = True
+
 
 
 class UIObj_Tape_Head(Widget):

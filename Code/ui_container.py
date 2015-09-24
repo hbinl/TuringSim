@@ -15,7 +15,7 @@ from ui_dialog import *
 from ui_edit import *
 from savetm_toxml import *
 #from machine_graph import Machine
-#from class_turing_deque import Transition, State
+from class_turing_deque import Tape
 
 
 class Container(Widget):
@@ -25,6 +25,10 @@ class Container(Widget):
             self.states = {}
             self.transitions = {}
             self.starting = None
+            self.tape = Tape()
+
+        def set_tape(self, tape):
+            self.tape.init_tape(tape)
 
         def set_starting(self, id):
             try:
@@ -137,7 +141,22 @@ class Container(Widget):
                 edit_bar.ids.add_tran_button.text = "Transition " + new.id
 
     def set_tape(self, tape):
-        self.ids.tape_layout.children[0].children[0].text = tape
+        if tape is not None:
+            self.machine.set_tape(tape)
+            if len(tape) < 15:
+
+                for _ in range(15-len(tape)-2):
+                    tape += "#"
+                tape = "##" + tape
+            tape = "  ".join(tape)
+            tape = tape[0:6] + "[" + tape[6] + "]" + tape[7:]
+            self.ids.tape_layout.children[0].children[0].text = tape
+        else:
+            tape = ""
+            for _ in range(15):
+                tape += "#"
+            tape = "  ".join(tape)
+            self.ids.tape_layout.children[0].children[0].text = tape
 
     def get_selection(self):
         if self.edit_mode:
@@ -148,7 +167,9 @@ class Container(Widget):
     def remove_selected_state(self):
         if self.edit_mode_selected_state is not None:
             name = self.edit_mode_selected_state.id
+            self.edit_mode_selected_state.remove_self()
             self.machine.delete_state(name)
+
             self.ids.layout_states.remove_widget(self.edit_mode_selected_state)
             self.select(None)
 
@@ -158,12 +179,20 @@ class Container(Widget):
 
         origin =self.machine.get_state(origin)
         end_node = self.machine.get_state(end)
-        transition = UIObj_Transition(id=str(end+seen+write+move),
+
+        offset = 0
+        for key,value in origin.get_transitions().iteritems():
+            for t in value:
+                if t.end_node == end_node:
+                    offset += 1
+
+        transition = UIObj_Transition(id=str(end+": "+seen+"/"+write+","+move),
                                         start=origin,
                                         end=end_node,
                                         seen=seen,
                                         write=write,
-                                        move=move)
+                                        move=move,
+                                      offset=offset)
         self.ids.layout_states.add_widget(transition)
         origin.add_transition(transition)
         end_node.add_incoming_transition(transition)
@@ -187,7 +216,7 @@ class Container(Widget):
         load_button.bind(on_release=self.load_handler)
         new_dtm_button.bind(on_release=self.create_new_handler)
 
-        print "home"
+
 
         # Reveal dialog
         Clock.schedule_once(self.home_popup.open, 0.5)
@@ -219,6 +248,7 @@ class Container(Widget):
         self.ids.layout_states.pos = (0,0)
         self.ids.layout_states.clear_widgets()
         self.machine = self.Machine()
+        self.set_tape(None)
 
     def after_load_handler(self, obj):
         # Purpose: To handle loading file and data from XML file
@@ -236,13 +266,22 @@ class Container(Widget):
             self.xml_tree = xml_tree
             xml_states = xml_tree.find("states")
 
+            end_states_names = []
+            for s in xml_tree.find("finalstates"):
+                end_states_names.append(s.attrib["name"])
+
             # Start looping through the XML file
             for child in xml_states:
                 # If halt, create halt object, else create ordinary state object
-                if child.attrib["name"] == "halt":
+                if child.attrib["name"] in end_states_names:
                     new = self.create_state(child.attrib["name"], True)
                 else:
                     new = self.create_state(child.attrib["name"], False)
+
+
+            initial_state_name = xml_tree.find("initialstate").attrib["name"]
+            start_node = self.machine.get_state(initial_state_name)
+            self.set_starting_state(start_node)
 
             for child in xml_states:
                 for tran in child:
@@ -252,6 +291,9 @@ class Container(Widget):
                     write = tran.attrib["writesym"]
                     move = tran.attrib["move"]
                     self.add_transition(origin, end, seen, write, move)
+
+            self.set_tape(xml_tree.find("initialtape").text)
+
 
     def reset_state_pos(self):
         self.state_y_pos = 100
@@ -345,6 +387,7 @@ class Container(Widget):
 
         # TO-DO: User input the name of the file. For now it's all 1.xml
 
+
         if self.xml_tree is not None:
             # If currently there is a xml loaded
 
@@ -353,16 +396,15 @@ class Container(Widget):
             xml_states = xml_tree.find("states")
             for state in xml_states.findall("state"):
                 xml_states.remove(state)
-            print self.machine.states
+
 
             # add in the current states in the memory
             for key,value in self.machine.states.iteritems():
-                print key, value.id
                 SubElement(xml_states, "state", {"name":value.id})
 
             # save file!
             xml_tree.write("1.xml")
-            self._popup = Popup(title="Spike 3 modifications saved in 1.xml",
+            self._popup = Popup(title="Incomplete implementation: Spike 3 modifications saved in 1.xml",
                             content=None,
                             size_hint=(0.9,0.3))
             self._popup.open()
@@ -378,7 +420,6 @@ class Container(Widget):
 
             # add in the current states in memory
             for key,value in self.machine.states.iteritems():
-                print key, value.id
                 SubElement(xml_states, "state", {"name":value.id})
             tree.write("1.xml")
 
@@ -403,10 +444,11 @@ class Container(Widget):
                 button.text = "Edit"
 
             self.children[0].canvas.clear()
+
             self.remove_widget(self.children[0])
             self.edit_mode = False
             if self.edit_mode_selected_state is not None:
-                print self.edit_mode_selected_state.id
+                self.edit_mode_selected_state.selection(False)
 
 
             self.edit_mode_selected_state = None
@@ -419,8 +461,9 @@ class Container(Widget):
             # Shows the customisation toolbar
             bl = UIObj_Edit()
             self.add_widget(bl)
+            bl.children[0].pos = 0,-100
             anim = Animation(x=0, y=0, duration=0.2)
-            anim.start(bl)
+            anim.start(bl.children[0])
 
 
 
@@ -454,6 +497,12 @@ class Container(Widget):
 
         self._popup.open()
 
+
+    def tape_view_left(self):
+        pass
+
+    def tape_view_right(self):
+        pass
 
 
 

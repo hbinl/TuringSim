@@ -1,1 +1,11 @@
-<turingmachine><alphabet /><initialtape /><blank char="" /><initialstate /><finalstates><finalstate /></finalstates><states /></turingmachine>
+<turingmachine>
+  <alphabet>0123b</alphabet>
+  <initialtape>1010101</initialtape>
+  <blank char="b" />
+  <initialstate name="0" />
+  <finalstates>
+    <finalstate name="halt" />
+  </finalstates>
+  <states>
+    <state name="1" /><state name="0" /><state name="halt" /></states>
+</turingmachine>

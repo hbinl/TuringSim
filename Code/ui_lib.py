@@ -78,7 +78,7 @@ class UIObj_State(Widget):
         if self.collide_point(touch.x,touch.y):
             if self.get_parent_window().children[0].edit_mode:
                 touch.grab(self)
-                print("Grabbed", self.id)
+
                 if self.selected is False:
                     self.selection(True)
                 else:
@@ -92,16 +92,18 @@ class UIObj_State(Widget):
     def on_touch_move(self, touch):
         # when it moves...
         if touch.grab_current is self:
-            print(self.incoming_transitions)
+
             self.pos = touch.x-25, touch.y-25
             self.children[0].pos = touch.x-25, touch.y-25
             if self.start_arrow is not None:
                 self.update_start_arrow(self.pos)
             for key,value in self.transitions.iteritems():
                 for t in value:
-                    t.redraw()
+                    if t is not None:
+                        t.redraw()
             for incoming in self.incoming_transitions:
-                incoming.redraw()
+                if incoming is not None:
+                    incoming.redraw()
 
 
 
@@ -117,7 +119,6 @@ class UIObj_State(Widget):
 
     def add_transition(self, transition):
         seen = transition.get_seen()
-        print self.transitions
         try:
             self.transitions[seen] += [transition]
         except KeyError:
@@ -162,10 +163,25 @@ class UIObj_State(Widget):
 
     def update_transitions_nodes(self):
         for key,value in self.transitions.iteritems():
-                for t in value:
-                    t.update_origin(self)
+            for t in value:
+                t.update_origin(self)
         for incoming in self.incoming_transitions:
             incoming.update_end(self)
+
+
+    def remove_self(self):
+        print("X")
+        for key,value in self.transitions.iteritems():
+            for t in value:
+                t.parent.remove_widget(t)
+                del t
+        for incoming in self.incoming_transitions:
+            print incoming.parent
+            origin = incoming.get_origin().get_transitions()
+            if incoming.get_loop() is False and incoming.parent is not None:
+                incoming.parent.remove_widget(incoming)
+
+
 
 class UIObj_State_Halting(UIObj_State):
     """
@@ -211,25 +227,62 @@ class UIObj_Transition(Widget):
 
         self.start_node = kwargs.get('start',0)
         self.end_node = kwargs.get('end',0)
+        self.offset = kwargs.get('offset',0)*(-20)
 
         super(UIObj_Transition,self).__init__(**kwargs)
 
+        self.loop = False
+        if self.start_node == self.end_node:
+            self.loop = True
+
+        #Adding name label to the state
+        self.add_widget(Label(text=str(self.id),
+                              pos=(self.center_x-(self.size[0]/2)+self.offset, self.center_y-(self.size[1]/2)+self.offset),
+                              size=(100,100),
+                              font_size=20,
+                              size_hint=(None, None)))
+
+
         self.redraw()
+
+    def get_loop(self):
+        return self.loop
 
     def get_seen(self):
         return self.seen
 
+    def get_origin(self):
+        return self.start_node
+
+    def get_end(self):
+        return self.end_node
+
     def redraw(self):
-        print self.start_node, self.end_node
-        self.canvas.before.clear()
-        self.canvas.before.add(Color(0,0,0))
-        self.canvas.before.add(Line(bezier=(self.start_node.get_center()[0],
-                                            self.start_node.get_center()[1],
-                                            (self.start_node.get_center()[0]+self.end_node.get_center()[0])/2+50,
-                                            (self.start_node.get_center()[1]+self.end_node.get_center()[1])/2+77,
-                                            self.end_node.get_center()[0],
-                                            self.end_node.get_center()[1]),
-                             width=1))
+        if self.loop:
+            self.canvas.before.clear()
+            self.canvas.before.add(Color(0,0,0))
+            self.canvas.before.add(Line(bezier=(self.start_node.get_center()[0],
+                                                self.start_node.get_center()[1],
+                                                (self.start_node.get_center()[0]+self.end_node.get_center()[0])/2+150,
+                                                (self.start_node.get_center()[1]+self.end_node.get_center()[1])/2+207,
+                                                (self.start_node.get_center()[0]+self.end_node.get_center()[0])/2+280,
+                                                (self.start_node.get_center()[1]+self.end_node.get_center()[1])/2+17,
+                                                self.end_node.get_center()[0],
+                                                self.end_node.get_center()[1]),
+                                 width=1))
+            self.children[0].pos =  (self.start_node.get_center()[0]+self.end_node.get_center()[0])/2+120+self.offset,  (self.start_node.get_center()[1]+self.end_node.get_center()[1])/2+57+self.offset
+
+        else:
+            self.canvas.before.clear()
+            self.canvas.before.add(Color(0,0,0))
+            self.canvas.before.add(Line(bezier=(self.start_node.get_center()[0],
+                                                self.start_node.get_center()[1],
+                                                (self.start_node.get_center()[0]+self.end_node.get_center()[0])/2+50,
+                                                (self.start_node.get_center()[1]+self.end_node.get_center()[1])/2+77,
+                                                self.end_node.get_center()[0],
+                                                self.end_node.get_center()[1]),
+                                 width=1))
+            self.children[0].pos =  (self.start_node.get_center()[0]+self.end_node.get_center()[0])/2+self.offset,  (self.start_node.get_center()[1]+self.end_node.get_center()[1])/2+self.offset
 
     def update_origin(self, node):
         self.start_node = node

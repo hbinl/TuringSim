@@ -52,12 +52,31 @@ class UIObj_Edit(Widget):
     def delete_state(self):
         selection = self.get_parent_window().children[0].get_selection()
         if selection is not None:
-            self.get_parent_window().children[0].remove_selected_state()
+            content = BoxLayout(orientation="horizontal")
+            button_ok = Button(text="Delete")
+            button_cancel = Button(text="Cancel")
+            content.add_widget(button_ok)
+            content.add_widget(button_cancel)
+
+            message = "Delete " + selection.id + "?"
+            self._popup = Popup(title=message,
+                                content=content,
+                                size_hint=(0.3, 0.3))
+            button_ok.bind(on_release=self.delete_state_proceed)
+            button_cancel.bind(on_release=self._popup.dismiss)
+            self._popup.open()
+
+
+
         else:
             self._popup = Popup(title="Warning",
                                 content=Label(text="Please select a state"),
                                 size_hint=(0.3, 0.3))
             self._popup.open()
+
+    def delete_state_proceed(self, value):
+        self.parent.remove_selected_state()
+        self._popup.dismiss()
 
     def add_tran_button(self):
         selection = self.get_parent_window().children[0].get_selection()
@@ -135,7 +154,7 @@ class UIObj_Edit(Widget):
 
     def on_ok_button_set_tape(self, value):
         tape = self._popup.content.children[1].text
-        tape = "  ".join(tape)
+
         self._popup.dismiss()
         self.parent.set_tape(tape)
 

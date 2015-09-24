@@ -326,14 +326,7 @@
     canvas:
         Color:
             rgba: 0,0,0,1
-        Line:
-            bezier: (self.origin_x, self.origin_y, self.mid_x*1.2, self.mid_y*1.2, self.end_x, self.end_y)
-            width: 2
-    Label:
-        text: root.tid
-        pos: root.mid_x, root.mid_y
-        size: (30,30)
-        size_hint: None, None
+
 
 
 # UI MENUS AND TOOLBARS
@@ -352,8 +345,8 @@
 
         Button:
             id: add_tran_button
-            text: "Add Transitions.."
-            on_release: root.add_transitions()
+            text: "Add Transition from.."
+            on_release: root.add_tran_button()
             font_size: 25
 
         Button:
@@ -380,6 +373,14 @@
             on_release: root.set_tape()
             font_size: 25
 
+
+<UIObj_StartArrow>:
+    canvas:
+        Color:
+            rgba: 0,0,0,1
+        Line:
+            bezier: (self.origin_x, self.origin_y, self.origin_x-100, self.origin_y+100)
+            width: 2
 
 
 

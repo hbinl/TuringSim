@@ -21,7 +21,7 @@ class UIObj_Edit(Widget):
 
     def add_state(self):
         content = BoxLayout(orientation="vertical")
-        textinput = TextInput(text='State1', multiline=False, id='textinput')
+        textinput = TextInput(hint_text='State Name', multiline=False, id='textinput')
         button = Button(text="Add State")
         content.add_widget(textinput)
         content.add_widget(button)
@@ -35,7 +35,6 @@ class UIObj_Edit(Widget):
 
     def on_enter_add(self, value):
         halting = False
-
         self.add_state_handler(self._popup.content.children[1].text, halting)
 
     def on_ok_button_add(self, value):
@@ -50,129 +49,95 @@ class UIObj_Edit(Widget):
             self._popup.title = "Name Error"
             self._popup.content.children[1].text = ""
 
-    def add_tran_button(self):
-        pass
-
     def delete_state(self):
-        self.get_parent_window().children[0].remove_selected_state()
+        selection = self.get_parent_window().children[0].get_selection()
+        if selection is not None:
+            self.get_parent_window().children[0].remove_selected_state()
+        else:
+            self._popup = Popup(title="Warning",
+                                content=Label(text="Please select a state"),
+                                size_hint=(0.3, 0.3))
+            self._popup.open()
 
+    def add_tran_button(self):
+        selection = self.get_parent_window().children[0].get_selection()
+        if selection is not None:
+            content = BoxLayout(orientation="vertical")
+
+
+            dest_input = TextInput(hint_text='Destination State', multiline=False)
+            read_input = TextInput(hint_text='Read', multiline=False)
+            write_input = TextInput(hint_text='Write', multiline=False)
+            move_input = TextInput(hint_text='Move (L/R/N)', multiline=False)
+            button = Button(text="Add Transition")
+            content.add_widget(dest_input)
+            content.add_widget(read_input)
+            content.add_widget(write_input)
+            content.add_widget(move_input)
+            content.add_widget(button)
+
+            origin = selection.id
+            string = "Enter New Transition from " + origin
+            self._popup = Popup(title=string,
+                                content=content,
+                                size_hint=(0.3, 0.4))
+            button.bind(on_release=self.on_ok_button_add_tran)
+            self._popup.open()
+        else:
+            self._popup = Popup(title="Warning",
+                                content=Label(text="Please select a state"),
+                                size_hint=(0.3, 0.3))
+            self._popup.open()
+
+    def on_ok_button_add_tran(self, value):
+        self._popup.dismiss()
+        print("x")
+
+        print self._popup.content.children
+        end = self._popup.content.children[4].text
+        seen = self._popup.content.children[3].text
+        write =self._popup.content.children[2].text
+        move = self._popup.content.children[1].text
+        self.parent.add_transition(None, end, seen, write, move)
 
     def make_initial_state(self):
-        pass
+        selection = self.get_parent_window().children[0].get_selection()
+        if selection is not None:
+            self.parent.set_starting_state(self.parent.get_selection())
+        else:
+            self._popup = Popup(title="Warning",
+                                content=Label(text="Please select a state"),
+                                size_hint=(0.3, 0.3))
+            self._popup.open()
 
     def make_halting_state(self):
-        pass
+        selection = self.get_parent_window().children[0].get_selection()
+        if selection is not None:
+            self.parent.set_selected_halting_state()
+        else:
+            self._popup = Popup(title="Warning",
+                                content=Label(text="Please select a state"),
+                                size_hint=(0.3, 0.3))
+            self._popup.open()
 
     def set_tape(self):
-        pass
+        content = BoxLayout(orientation="vertical")
+        textinput = TextInput(hint_text='Use # for blank, e.g ##010101###', multiline=False, id='textinput')
+        button = Button(text="Set Tape")
+        content.add_widget(textinput)
+        content.add_widget(button)
 
-#
-# class UI_LongTouch_Menu(Widget):
-#     # Object for the State Menu items in Edit Mode
-#     # Allowing the user to delete and customise states
-#     menu = ObjectProperty(None)
-#
-#     def __init__(self, **kwargs):
-#         self.pos = kwargs.get('pos',(100,0))
-#         self.state_ref = kwargs.get('state_ref',None)
-#
-#         super(UI_LongTouch_Menu,self).__init__(**kwargs)
-#         #self.ids.del_button.text = "Delete" + self.state_ref.id
-#
-#     def delete_state(self):
-#         # Handler for delete state button
-#         if self.state_ref is not None:
-#             self.get_parent_window().children[0].edit_mode_selected_state = None
-#             self.get_parent_window().children[0].machine.delete_state(self.state_ref.id)
-#             self.get_parent_window().children[0].ids.layout_states.remove_widget(self.state_ref)
-#             self.get_parent_window().children[0].ids.container_rl.remove_widget(self)
-#
-#             #print self.get_parent_window().children[0].machine.states
+        self._popup = Popup(title="Set custom tape",
+                            content=content,
+                            size_hint=(0.4, 0.3))
+        button.bind(on_release=self.on_ok_button_set_tape)
+        self._popup.open()
+
+    def on_ok_button_set_tape(self, value):
+        tape = self._popup.content.children[1].text
+        tape = "  ".join(tape)
+        self._popup.dismiss()
+        self.parent.set_tape(tape)
 
 
-# class UIObj_State_Template(UIObj_State):
-#     """
-#     @purpose UI Object class for Halting States' visual representation, based
-#             on inherited implementation of UIObj_State
-#     @kivyparams
-#         - size: diameter of the state, handled by the caller
-#         - x & y: calculated position of the state (handled by the caller)
-#         - id: Name of the state, will be used for label
-#     """
-#     state = ObjectProperty(None)
-#
-#     def __init__(self, **kwargs):
-#         super(UIObj_State_Template,self).__init__(**kwargs)
-#         self.ishalt = False
-#
-#
-#     def on_touch_down(self, touch):
-#         # For Edit Mode template objects, this function upon activation,
-#         # creates a new copy of State object, and passes control over to the new object
-#         # Then the user can drag the object and add it to the canvas
-#
-#         # handler for touch events, using collide point to check if inside State boundary
-#         if self.collide_point(touch.x,touch.y):
-#             touch.grab(self)
-#
-#             # Create new object...
-#             copy_name = str("new"+str(touch.x+touch.y))
-#             copy = UIObj_State(id=copy_name, x = touch.x, y = touch.y, size=(100,100))
-#
-#             # Adding it to UI and keeping track in memory
-#             self.parent.parent.ids.layout_states.add_widget(copy)
-#             self.get_parent_window().children[0].machine.add_state(copy_name, copy)
-#
-#             # Passing control over...
-#             touch.ungrab(self)
-#             touch.grab(copy)
-#             #copy.initialise()
-#
-#     def on_touch_move(self, touch):
-#         # when it moves...
-#         if touch.grab_current is self:
-#             self.pos = touch.x-25, touch.y-25
-#             self.children[0].pos = touch.x-25, touch.y-25
-#
-#
-#     def on_touch_up(self, touch):
-#         # upon user's release of the item
-#         if touch.grab_current is self:
-#             touch.ungrab(self)
-#
-#
-# class UIObj_State_Halting_Template(UIObj_State_Template):
-#     """
-#     @purpose UI Object class for Halting States' visual representation, based
-#             on inherited implementation of UIObj_State
-#     @kivyparams
-#         - size: diameter of the state, handled by the caller
-#         - x & y: calculated position of the state (handled by the caller)
-#         - id: Name of the state, will be used for label
-#     """
-#     state = ObjectProperty(None)
-#     def __init__(self, **kwargs):
-#         super(UIObj_State_Halting_Template,self).__init__(**kwargs)
-#         self.ishalt = True
-#
-#     def on_touch_down(self, touch):
-#         # For Edit Mode template objects, this function upon activation,
-#         # creates a new copy of State object, and passes control over to the new object
-#         # Then the user can drag the object and add it to the canvas
-#
-#
-#         # handler for touch events, using collide point to check if inside State boundary
-#         if self.collide_point(touch.x,touch.y):
-#             touch.grab(self)
-#
-#             # Create new object...
-#             copy_name = str("halt"+str(touch.x+touch.y))
-#             copy = UIObj_State_Halting(id=copy_name, x = touch.x, y = touch.y, size=(100,100))
-#
-#             # Adding it to UI and keeping track in memory
-#             self.parent.parent.ids.layout_states.add_widget(copy)
-#             self.get_parent_window().children[0].machine.add_state(copy_name, copy)
-#
-#             # Passing control over...
-#             touch.ungrab(self)
-#             touch.grab(copy)
+

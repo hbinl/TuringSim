@@ -24,6 +24,17 @@ class Container(Widget):
         def __init__(self):
             self.states = {}
             self.transitions = {}
+            self.starting = None
+
+        def set_starting(self, id):
+            try:
+                self.starting = self.states[id]
+
+            except KeyError:
+                raise Exception("State does not exist.")
+
+        def get_starting_state(self):
+            return self.starting
 
         def add_state(self, id, reference):
             try:
@@ -33,7 +44,8 @@ class Container(Widget):
                 self.states[id] = reference
                 print self.states
 
-
+        def get_state(self, id):
+            return self.states[id]
 
         def delete_state(self, id):
             del self.states[id]
@@ -51,6 +63,8 @@ class Container(Widget):
 
         def modify_state(self,original_id,new_id):
             pass
+
+
 
 
     """
@@ -86,6 +100,24 @@ class Container(Widget):
         self.state_y_hint = 0.1
 
 
+    def set_selected_halting_state(self):
+        selection = self.get_selection()
+        transition = selection.get_transitions()
+        incoming = selection.incoming_transitions
+        arrow = selection.start_arrow
+        arguments = selection.kw
+        old_position = selection.pos
+        self.remove_selected_state()
+
+        new = self.create_state(arguments.get('id',0),True)
+        new.pos = old_position
+        new.children[0].pos = old_position
+        new.start_arrow = arrow
+        new.transitions = transition
+        new.incoming_transitions = incoming
+        new.update_transitions_nodes()
+
+
     def select(self, new):
         edit_bar = self.children[0]
         if self.edit_mode is True:
@@ -94,6 +126,7 @@ class Container(Widget):
                 edit_bar.ids.del_button.text = "Delete State"
                 edit_bar.ids.make_initial_button.text = "Make Starting"
                 edit_bar.ids.make_halting_button.text = "Make Halting"
+                edit_bar.ids.add_tran_button.text = "Add Transition from.."
             else:
                 if self.edit_mode_selected_state is not None:
                     self.edit_mode_selected_state.selection(False)
@@ -101,8 +134,16 @@ class Container(Widget):
                 edit_bar.ids.del_button.text = "Delete " + new.id
                 edit_bar.ids.make_initial_button.text = "Make " + new.id + " Starting"
                 edit_bar.ids.make_halting_button.text = "Make " + new.id + " Halting"
+                edit_bar.ids.add_tran_button.text = "Transition " + new.id
 
+    def set_tape(self, tape):
+        self.ids.tape_layout.children[0].children[0].text = tape
 
+    def get_selection(self):
+        if self.edit_mode:
+            return self.edit_mode_selected_state
+        else:
+            return None
 
     def remove_selected_state(self):
         if self.edit_mode_selected_state is not None:
@@ -110,6 +151,23 @@ class Container(Widget):
             self.machine.delete_state(name)
             self.ids.layout_states.remove_widget(self.edit_mode_selected_state)
             self.select(None)
+
+    def add_transition(self, origin, end, seen, write, move):
+        if origin is None:
+            origin = self.get_selection().id
+
+        origin =self.machine.get_state(origin)
+        end_node = self.machine.get_state(end)
+        transition = UIObj_Transition(id=str(end+seen+write+move),
+                                        start=origin,
+                                        end=end_node,
+                                        seen=seen,
+                                        write=write,
+                                        move=move)
+        self.ids.layout_states.add_widget(transition)
+        origin.add_transition(transition)
+        end_node.add_incoming_transition(transition)
+
 
 
     def home_screen(self, obj):
@@ -160,6 +218,7 @@ class Container(Widget):
         self.zoom_reset()
         self.ids.layout_states.pos = (0,0)
         self.ids.layout_states.clear_widgets()
+        self.machine = self.Machine()
 
     def after_load_handler(self, obj):
         # Purpose: To handle loading file and data from XML file
@@ -181,11 +240,18 @@ class Container(Widget):
             for child in xml_states:
                 # If halt, create halt object, else create ordinary state object
                 if child.attrib["name"] == "halt":
-                    self.create_state(child.attrib["name"], True)
+                    new = self.create_state(child.attrib["name"], True)
                 else:
-                    self.create_state(child.attrib["name"], False)
+                    new = self.create_state(child.attrib["name"], False)
 
-                # Add the states to the canvas, and keep track of states in memory
+            for child in xml_states:
+                for tran in child:
+                    origin = child.attrib["name"]
+                    end = tran.attrib["newstate"]
+                    seen = tran.attrib["seensym"]
+                    write = tran.attrib["writesym"]
+                    move = tran.attrib["move"]
+                    self.add_transition(origin, end, seen, write, move)
 
     def reset_state_pos(self):
         self.state_y_pos = 100
@@ -226,6 +292,7 @@ class Container(Widget):
                     #                               )
                     # board.add_widget(transition)
                     # print self.machine.states
+            return state
         else:
             raise Exception
 
@@ -257,6 +324,16 @@ class Container(Widget):
 
         # Reveal dialog
         self._popup.open()
+
+    def get_starting_state(self):
+        return self.machine.get_starting_state()
+
+    def set_starting_state(self, state):
+        self.machine.set_starting(state.id)
+        initial_state = self.machine.get_starting_state()
+        arrow = UIObj_StartArrow(node=initial_state)
+        self.ids.layout_states.add_widget(arrow)
+        state.add_start_arrow(arrow)
 
 
     def save_handler(self, text):
@@ -330,9 +407,8 @@ class Container(Widget):
             self.edit_mode = False
             if self.edit_mode_selected_state is not None:
                 print self.edit_mode_selected_state.id
-                print self.edit_mode_selected_state.menu
-                print self.edit_mode_selected_state.menu.parent
-                self.edit_mode_selected_state.menu.parent.remove_widget(self.edit_mode_selected_state.menu)
+
+
             self.edit_mode_selected_state = None
         else:
             if button is not None:

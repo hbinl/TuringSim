@@ -141,7 +141,7 @@ class UIObj_Edit(Widget):
 
     def set_tape(self):
         content = BoxLayout(orientation="vertical")
-        textinput = TextInput(hint_text='Use # for blank, e.g ##010101###', multiline=False, id='textinput')
+        textinput = TextInput(hint_text='Use b for blank, e.g bb010101bbb', multiline=False, id='textinput')
         button = Button(text="Set Tape")
         content.add_widget(textinput)
         content.add_widget(button)

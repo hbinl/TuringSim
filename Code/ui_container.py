@@ -13,26 +13,60 @@ from kivy.clock import Clock
 
 from ui_dialog import *
 from ui_edit import *
-from savetm_toxml import *
+#from savetm_toxml import *
 #from machine_graph import Machine
-from class_turing_deque import Tape
+from tape import Tape
+from xml.etree.ElementTree import *
 
+
+from xml.dom import minidom
+
+def prettify(elem):
+    """Return a pretty-printed XML string for the Element.
+    """
+    rough_string = ET.tostring(elem, 'utf-8')
+    reparsed = minidom.parseString(rough_string)
+    return reparsed.toprettyxml(indent="  ")
 
 class Container(Widget):
 
     class Machine():
-        def __init__(self):
+        def __init__(self,blankchar="b"):
             self.states = {}
             self.transitions = {}
             self.starting = None
-            self.tape = Tape()
+            self.tape = Tape(blankchar)
+            self.halting_states = {}
+            self.blankchar = blankchar
+
+            self.current_step = 0
+            self.current_state = self.starting
+            self.current_read = None
+            self.halted = False
+
+        def is_halted(self):
+            return self.halted
+
+        def halt(self):
+            self.halted = True
 
         def set_tape(self, tape):
             self.tape.init_tape(tape)
 
+        def set_blank_char(self, char):
+            self.blankchar = char
+
+        def get_tape(self):
+            return self.tape.print_tape()
+
+        def get_current_tape_head_pos(self):
+            return self.tape.get_head_pos()
+
         def set_starting(self, id):
             try:
                 self.starting = self.states[id]
+                if self.current_step == 0:
+                    self.current_state = self.starting
 
             except KeyError:
                 raise Exception("State does not exist.")
@@ -68,7 +102,63 @@ class Container(Widget):
         def modify_state(self,original_id,new_id):
             pass
 
+        def execute(self):
+            self.increment_step()
+            self.current_read = self.tape.read()
+            print self.current_read, self.current_state.id
 
+            transitions = self.current_state.get_transition_seen(self.current_read)
+            #print self.current_read
+            for tran in transitions:
+                self.current_state = tran.get_end()
+                self.write_current_pos(tran.get_write())
+                move = tran.get_move()
+                print tran.id, self.current_state.id
+                if move == "L":
+                    self.move_left()
+                elif move == "R":
+                    self.move_right()
+                elif move == "N":
+                    pass
+
+            print(self.tape.head_pos, self.tape.tape)
+
+            if len(transitions) == 0:
+                # if no transition if defined for a particular symbol in a state, halts
+                self.halt()
+
+        def move_left(self):
+            """
+            @purpose Moves the machine head to the left, and extends the tape if necessary
+            """
+            self.tape.move_left()
+
+        def move_right(self):
+            """
+            @purpose Moves the machine head to the right, and extends the tape if necessary
+            """
+            self.tape.move_right()
+
+
+
+        def increment_step(self):
+            """
+            @purpose Maintains a counter of steps for a TM simulation
+            """
+            self.current_step += 1
+
+        def write_current_pos(self, value):
+            """
+            @purpose Allows for writing data on the current position of the head
+            :param value: The value to be written
+            """
+            return self.tape.write(value)
+
+        def check_halt_answer(self):
+            if self.current_state.is_halt() is True:
+                print "halted with answer yes"
+            else:
+                print "halted with answer no"
 
 
     """
@@ -103,6 +193,8 @@ class Container(Widget):
         self.state_y_pos = 100
         self.state_y_hint = 0.1
 
+        self.xml_tree = None
+
 
     def set_selected_halting_state(self):
         selection = self.get_selection()
@@ -111,7 +203,7 @@ class Container(Widget):
         arrow = selection.start_arrow
         arguments = selection.kw
         old_position = selection.pos
-        self.remove_selected_state()
+        self.remove_selected_state(True)
 
         new = self.create_state(arguments.get('id',0),True)
         new.pos = old_position
@@ -146,17 +238,29 @@ class Container(Widget):
             if len(tape) < 15:
 
                 for _ in range(15-len(tape)-2):
-                    tape += "#"
-                tape = "##" + tape
+                    tape += "b"
+                tape = "bb" + tape
             tape = "  ".join(tape)
             tape = tape[0:6] + "[" + tape[6] + "]" + tape[7:]
             self.ids.tape_layout.children[0].children[0].text = tape
         else:
             tape = ""
             for _ in range(15):
-                tape += "#"
+                tape += "b"
             tape = "  ".join(tape)
             self.ids.tape_layout.children[0].children[0].text = tape
+
+
+    def redraw_tape(self):
+        tape = self.machine.get_tape()
+        if len(tape) < 15:
+            for _ in range(15-len(tape)-2):
+                tape += "b"
+            tape = "bb" + tape
+        tape = "  ".join(tape)
+        pos = self.machine.get_current_tape_head_pos() +2
+        tape = tape[0:3*pos] + "[" + tape[3*pos] + "]" + tape[3*pos+1:]
+        self.ids.tape_layout.children[0].children[0].text = tape
 
     def get_selection(self):
         if self.edit_mode:
@@ -164,14 +268,20 @@ class Container(Widget):
         else:
             return None
 
-    def remove_selected_state(self):
+    def remove_selected_state(self, replace_flag=False):
         if self.edit_mode_selected_state is not None:
-            name = self.edit_mode_selected_state.id
-            self.edit_mode_selected_state.remove_self()
-            self.machine.delete_state(name)
+            if replace_flag is False:
+                name = self.edit_mode_selected_state.id
+                self.edit_mode_selected_state.remove_self()
+                self.machine.delete_state(name)
 
-            self.ids.layout_states.remove_widget(self.edit_mode_selected_state)
-            self.select(None)
+                self.ids.layout_states.remove_widget(self.edit_mode_selected_state)
+                self.select(None)
+            else:
+                name = self.edit_mode_selected_state.id
+                self.machine.delete_state(name)
+                self.ids.layout_states.remove_widget(self.edit_mode_selected_state)
+                self.select(None)
 
     def add_transition(self, origin, end, seen, write, move):
         if origin is None:
@@ -243,6 +353,7 @@ class Container(Widget):
         self._popup.open()
 
     def reset_container(self):
+        self.xml_tree = None
         self.reset_state_pos()
         self.zoom_reset()
         self.ids.layout_states.pos = (0,0)
@@ -264,6 +375,9 @@ class Container(Widget):
             # reading from XML file
             xml_tree = ET.parse(obj.content.path)
             self.xml_tree = xml_tree
+
+            self.machine = self.Machine(xml_tree.find("blank").attrib["char"])
+
             xml_states = xml_tree.find("states")
 
             end_states_names = []
@@ -327,13 +441,6 @@ class Container(Widget):
             self.machine.add_state(str(name),state)
             board.add_widget(state)
             self.update_state_pos()
-
-                            # # TODO_FUTURE TRANSITION STUFFS
-                    # transition = UIObj_Transition(tid=str(child.attrib["name"]),
-                    #                               start=1
-                    #                               )
-                    # board.add_widget(transition)
-                    # print self.machine.states
             return state
         else:
             raise Exception
@@ -371,59 +478,83 @@ class Container(Widget):
         return self.machine.get_starting_state()
 
     def set_starting_state(self, state):
+        old = self.machine.get_starting_state()
+        if old is not None:
+            arrow = old.remove_start_arrow()
+            self.ids.layout_states.remove_widget(arrow)
+
+
         self.machine.set_starting(state.id)
         initial_state = self.machine.get_starting_state()
         arrow = UIObj_StartArrow(node=initial_state)
         self.ids.layout_states.add_widget(arrow)
         state.add_start_arrow(arrow)
+        self.select(initial_state)
 
 
     def save_handler(self, text):
-        #Handler for Spike3 save button, saves the customised Turing machine to xml
-
+        #Handler for  save button, saves the customised Turing machine to xml
         # Check if currently there is a xml file loaded
         # if there is currently a xml loaded, update the xml file in 1.xml
         # else, create a new turing machine xml file in 1.xml
 
         # TO-DO: User input the name of the file. For now it's all 1.xml
+        # if self.xml_tree is not None:
+        # If currently there is a xml loaded
+        # get the current xml tree, and remove all the states
 
+        new_tree = self.generate_memory_etree()
 
-        if self.xml_tree is not None:
-            # If currently there is a xml loaded
-
-            # get the current xml tree, and remove all the states
-            xml_tree = self.xml_tree
-            xml_states = xml_tree.find("states")
-            for state in xml_states.findall("state"):
-                xml_states.remove(state)
-
-
-            # add in the current states in the memory
-            for key,value in self.machine.states.iteritems():
-                SubElement(xml_states, "state", {"name":value.id})
-
-            # save file!
-            xml_tree.write("1.xml")
-            self._popup = Popup(title="Incomplete implementation: Spike 3 modifications saved in 1.xml",
+        xml = prettify(new_tree.getroot())
+        print xml
+        open('1.xml','w').write(xml)
+        self._popup = Popup(title="modifications saved in 1.xml",
                             content=None,
                             size_hint=(0.9,0.3))
-            self._popup.open()
+        self._popup.open()
 
+
+    def generate_memory_etree(self):
+        if self.xml_tree is not None:
+            xml_tree = self.xml_tree
         else:
-            # if no xml file loaded, create new
-            tree = create_newTM()
-            tree.write("1.xml")
-            xml_states = tree.find("states")
+            xml_tree = Element("turingmachine")
+            SubElement(xml_tree,"alphabet")
+            SubElement(xml_tree,"initialtape")
+            SubElement(xml_tree,"blank", {'char':'b'})
+            SubElement(xml_tree,"initialstate")
+            SubElement(xml_tree,"finalstates")
+            SubElement(xml_tree,"states")
+            xml_tree = ElementTree(xml_tree)
 
-            for state in xml_states.findall("state"):
+        xml_tree.find("initialtape").text = self.machine.get_tape()
+        if self.machine.get_starting_state() is not None:
+            xml_tree.find("initialstate").attrib["name"] = self.machine.get_starting_state().id
+        final = xml_tree.find("finalstates")
+        for state in final.findall("finalstate"):
+            final.remove(state)
+        for key,value in self.machine.states.iteritems():
+            if value.is_halt():
+                final.append(Element("finalstate",
+                                     {"name":value.id}))
+
+        xml_states = xml_tree.find("states")
+        for state in xml_states.findall("state"):
                 xml_states.remove(state)
+        for key,value in self.machine.states.iteritems():
+                state = Element("state", {"name":value.id})
 
-            # add in the current states in memory
-            for key,value in self.machine.states.iteritems():
-                SubElement(xml_states, "state", {"name":value.id})
-            tree.write("1.xml")
+                for key,transitions in value.get_transitions().iteritems():
+                    for transition in transitions:
+                        state.append(Element("transition",
+                                             {"seensym":transition.get_seen(),
+                                              "writesym": transition.get_write(),
+                                              "newstate": transition.get_end().id,
+                                              "move": transition.get_move()}))
 
+                xml_states.append(state)
 
+        return xml_tree
 
     def edit_handler(self, button):
         # Handles the edit button click
@@ -432,7 +563,6 @@ class Container(Widget):
             self.edit_mode_controller(False)
         else:
             self.edit_mode_controller(True)
-
 
 
     def edit_mode_controller(self, flag):
@@ -505,4 +635,27 @@ class Container(Widget):
         pass
 
 
+    def execute_handler(self,text):
+        if text == "Execute":
 
+            self.execute()
+
+        elif text == "Stop":
+            self.execute_stop()
+
+    def execute(self, value=None):
+        self.ids.execute_button.text = "Stop"
+        if self.machine.current_state is not None:
+                self.machine.current_state.execute_current_state_restore()
+        if self.machine.is_halted() is False:
+            self.machine.execute()
+            self.redraw_tape()
+            self.machine.current_state.execute_current_state()
+            self._event = Clock.schedule_once(self.execute, 0.6)
+        else:
+            self.execute_stop()
+            answer = self.machine.check_halt_answer()
+
+    def execute_stop(self):
+        self.ids.execute_button.text = "Execute"
+        Clock.unschedule(self._event)

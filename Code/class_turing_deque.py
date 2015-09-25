@@ -129,7 +129,7 @@ class TuringMachine_Deque():
                     pass
 
                 # print out the status of the machine
-                #self.print_machine()
+                self.print_machine()
 
             if len(transitions) == 0:
                 # if no transition if defined for a particular symbol in a state, halts
@@ -218,7 +218,7 @@ class TuringMachine_Deque():
 
 
 class Tape():
-    def __init__(self, blankchar="#"):
+    def __init__(self, blankchar="b"):
         """
         Tape implementation using collections.deque
         deque allows O(1) access from either side
@@ -233,6 +233,9 @@ class Tape():
         self.blankchar = blankchar
 
         self.head_pos = 0
+
+    def set_blank_char(self, char):
+        self.blankchar = char
 
     def init_tape(self, tape):
         """
@@ -251,7 +254,7 @@ class Tape():
         final = "".join(list(self.tape))
         print final[0:ind] + "[" + final[ind] + "]" + final[ind+1:]
         self.tape.rotate(0-self.head_pos)
-
+        return final
 
     def move_right(self):
         self.tape.rotate(-1)
@@ -292,3 +295,6 @@ class Tape():
         """
         return len(self.tape)
 
+
+x = TuringMachine_Deque("flipper.xml")
+x.execute()

@@ -105,7 +105,16 @@ class UIObj_State(Widget):
                 if incoming is not None:
                     incoming.redraw()
 
+    def execute_current_state(self):
+        self.canvas.before.clear()
+        self.canvas.before.add(Color(0,1,0))
+        self.canvas.before.add(Ellipse(pos=(self.pos[0]-10,self.pos[1]-10), size=(self.size[0]+20,self.size[1]+20)))
 
+    def execute_current_state_restore(self):
+        self.canvas.before.clear()
+
+        # self.canvas.add(Color(0.1,0.1,0.1))
+        # self.canvas.add(Ellipse(pos=self.pos, size=self.size))
 
 
     def on_touch_up(self, touch):
@@ -115,7 +124,7 @@ class UIObj_State(Widget):
 
 
     def is_halt(self):
-        return self.halting
+        return self.ishalt
 
     def add_transition(self, transition):
         seen = transition.get_seen()
@@ -147,6 +156,11 @@ class UIObj_State(Widget):
 
     def update_start_arrow(self, touch):
         self.start_arrow.redraw(touch)
+
+    def remove_start_arrow(self):
+        old = self.start_arrow
+        self.start_arrow = None
+        return old
 
     def get_transitions(self):
         return self.transitions
@@ -199,19 +213,19 @@ class UIObj_State_Halting(UIObj_State):
 
 
 
-class UIObj_Tape_Head(Widget):
-    def on_touch_down(self, touch):
-        if self.collide_point(*touch.pos):
-            touch.grab(self)
-
-    def on_touch_move(self, touch):
-        if touch.grab_current is self:
-            if (touch.x > Window.size[0] * 0.3) and (touch.x < Window.size[0]*0.71):
-                self.center_x = touch.x
-
-    def on_touch_up(self, touch):
-        if touch.grab_current is self:
-            touch.ungrab(self)
+# class UIObj_Tape_Head(Widget):
+#     def on_touch_down(self, touch):
+#         if self.collide_point(*touch.pos):
+#             touch.grab(self)
+#
+#     def on_touch_move(self, touch):
+#         if touch.grab_current is self:
+#             if (touch.x > Window.size[0] * 0.3) and (touch.x < Window.size[0]*0.71):
+#                 self.center_x = touch.x
+#
+#     def on_touch_up(self, touch):
+#         if touch.grab_current is self:
+#             touch.ungrab(self)
 
 
 
@@ -256,6 +270,12 @@ class UIObj_Transition(Widget):
 
     def get_end(self):
         return self.end_node
+
+    def get_write(self):
+        return self.write
+
+    def get_move(self):
+        return self.move
 
     def redraw(self):
         if self.loop:

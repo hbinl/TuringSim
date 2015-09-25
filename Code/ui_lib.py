@@ -27,7 +27,7 @@ from kivy.uix.textinput import TextInput
 #from kivy.graphics import Color, Ellipse, Rectangle, Line
 from kivy.properties import ObjectProperty
 import ui_edit
-
+from kivy.clock import Clock
 
 
 
@@ -113,8 +113,6 @@ class UIObj_State(Widget):
     def execute_current_state_restore(self):
         self.canvas.before.clear()
 
-        # self.canvas.add(Color(0.1,0.1,0.1))
-        # self.canvas.add(Ellipse(pos=self.pos, size=self.size))
 
 
     def on_touch_up(self, touch):
@@ -213,21 +211,6 @@ class UIObj_State_Halting(UIObj_State):
 
 
 
-# class UIObj_Tape_Head(Widget):
-#     def on_touch_down(self, touch):
-#         if self.collide_point(*touch.pos):
-#             touch.grab(self)
-#
-#     def on_touch_move(self, touch):
-#         if touch.grab_current is self:
-#             if (touch.x > Window.size[0] * 0.3) and (touch.x < Window.size[0]*0.71):
-#                 self.center_x = touch.x
-#
-#     def on_touch_up(self, touch):
-#         if touch.grab_current is self:
-#             touch.ungrab(self)
-
-
 
 class UIObj_Transition(Widget):
     transition = ObjectProperty(None)
@@ -255,8 +238,6 @@ class UIObj_Transition(Widget):
                               size=(100,100),
                               font_size=20,
                               size_hint=(None, None)))
-
-
         self.redraw()
 
     def get_loop(self):
@@ -310,6 +291,13 @@ class UIObj_Transition(Widget):
     def update_end(self, node):
         self.end_node = node
 
+    def execute_highlight(self):
+        self.children[0].color = (0,1,0.5,1)
+        Clock.schedule_once(self.execute_unhighlight,1)
+
+    def execute_unhighlight(self, value=None):
+        self.children[0].color = (1,1,1,1)
+
 
 class UIObj_StartArrow(Widget):
     start = ObjectProperty(None)
@@ -331,6 +319,5 @@ class UIObj_StartArrow(Widget):
         self.canvas.add(Color(0,0,0))
         self.canvas.add(Line(bezier=(self.origin_x, self.origin_y, self.origin_x-50, self.origin_y+50), width=3))
         self.canvas.add(Triangle(points=(self.origin_x, self.origin_y, self.origin_x-20, self.origin_y,self.origin_x, self.origin_y+20)))
-
 
 

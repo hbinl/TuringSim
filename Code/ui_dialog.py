@@ -37,18 +37,6 @@ class SaveFileChooserWindow(FloatLayout):
     cancel = ObjectProperty(None)
     path = None
 
-    def save_file(self, path, filename):
-        # saving the path into this object for future use
-        try:
-            self.path = os.path.join(path)
-            self.cancel_dialog()
-        except ValueError:
-            print("IndexError, os.path.join")
-
-    def cancel_dialog(self):
-        # used for dismissing the dialog box
-        self.parent.parent.parent.dismiss()
-
 
 class BrowseFileChooserWindow(FloatLayout):
     """
@@ -63,8 +51,6 @@ class BrowseFileChooserWindow(FloatLayout):
 
         self.path = os.path.join(path,filename[0])
         self.cancel_dialog()
-        # except:
-        #     print("IndexError, os.path.join")
 
     def cancel_dialog(self):
         # used for dismissing the dialog box

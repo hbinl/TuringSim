@@ -83,7 +83,6 @@ class UIObj_Edit(Widget):
         if selection is not None:
             content = BoxLayout(orientation="vertical")
 
-
             dest_input = TextInput(hint_text='Destination State', multiline=False)
             read_input = TextInput(hint_text='Read', multiline=False)
             write_input = TextInput(hint_text='Write', multiline=False)

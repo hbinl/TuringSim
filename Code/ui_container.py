@@ -44,6 +44,7 @@ class Container(Widget):
             self.current_read = None
             self.halted = False
 
+
         def is_halted(self):
             return self.halted
 
@@ -102,14 +103,20 @@ class Container(Widget):
         def modify_state(self,original_id,new_id):
             pass
 
+        def reset_execution(self):
+            self.current_step = 0
+            self.current_read = None
+            self.current_state = self.starting
+            self.halted = False
+
         def execute(self):
             self.increment_step()
             self.current_read = self.tape.read()
-            print self.current_read, self.current_state.id
 
             transitions = self.current_state.get_transition_seen(self.current_read)
             #print self.current_read
             for tran in transitions:
+                tran.execute_highlight()
                 self.current_state = tran.get_end()
                 self.write_current_pos(tran.get_write())
                 move = tran.get_move()
@@ -122,6 +129,7 @@ class Container(Widget):
                     pass
 
             print(self.tape.head_pos, self.tape.tape)
+
 
             if len(transitions) == 0:
                 # if no transition if defined for a particular symbol in a state, halts
@@ -155,10 +163,18 @@ class Container(Widget):
             return self.tape.write(value)
 
         def check_halt_answer(self):
+            print self.current_state.id
             if self.current_state.is_halt() is True:
+                content= Label(text="Halted with answer YES")
                 print "halted with answer yes"
             else:
+                content= Label(text="Halted with answer NO")
                 print "halted with answer no"
+
+            self._popup = Popup(title="Execution Complete",
+                            content=content,
+                            size_hint=(0.3, 0.3))
+            self._popup.open()
 
 
     """
@@ -194,16 +210,22 @@ class Container(Widget):
         self.state_y_hint = 0.1
 
         self.xml_tree = None
+        self._event = None
 
 
     def set_selected_halting_state(self):
+
         selection = self.get_selection()
         transition = selection.get_transitions()
         incoming = selection.incoming_transitions
         arrow = selection.start_arrow
         arguments = selection.kw
         old_position = selection.pos
+        start_flag = False
+        if selection == self.machine.get_starting_state():
+            start_flag = True
         self.remove_selected_state(True)
+
 
         new = self.create_state(arguments.get('id',0),True)
         new.pos = old_position
@@ -212,6 +234,9 @@ class Container(Widget):
         new.transitions = transition
         new.incoming_transitions = incoming
         new.update_transitions_nodes()
+        if start_flag is True:
+            self.machine.set_starting(new.id)
+
 
 
     def select(self, new):
@@ -235,14 +260,7 @@ class Container(Widget):
     def set_tape(self, tape):
         if tape is not None:
             self.machine.set_tape(tape)
-            if len(tape) < 15:
-
-                for _ in range(15-len(tape)-2):
-                    tape += "b"
-                tape = "bb" + tape
-            tape = "  ".join(tape)
-            tape = tape[0:6] + "[" + tape[6] + "]" + tape[7:]
-            self.ids.tape_layout.children[0].children[0].text = tape
+            self.redraw_tape()
         else:
             tape = ""
             for _ in range(15):
@@ -254,11 +272,10 @@ class Container(Widget):
     def redraw_tape(self):
         tape = self.machine.get_tape()
         if len(tape) < 15:
-            for _ in range(15-len(tape)-2):
+            for _ in range(15-len(tape)):
                 tape += "b"
-            tape = "bb" + tape
         tape = "  ".join(tape)
-        pos = self.machine.get_current_tape_head_pos() +2
+        pos = self.machine.get_current_tape_head_pos()
         tape = tape[0:3*pos] + "[" + tape[3*pos] + "]" + tape[3*pos+1:]
         self.ids.tape_layout.children[0].children[0].text = tape
 
@@ -446,9 +463,6 @@ class Container(Widget):
             raise Exception
 
 
-
-
-
     def close_handler(self):
         content = BoxLayout(orientation="vertical")
         content.add_widget(Label(text="Are you sure you want to close the TM?"))
@@ -491,8 +505,17 @@ class Container(Widget):
         state.add_start_arrow(arrow)
         self.select(initial_state)
 
+    def dismiss_popup(self):
+        self._popup.dismiss()
 
-    def save_handler(self, text):
+    def save_handler(self):
+        # pops up the Save window
+        content = SaveFileChooserWindow(save=self.after_save_handler, cancel=self.dismiss_popup)
+        self._popup = Popup(title="Save file", content=content,
+                            size_hint=(0.9, 0.9))
+        self._popup.open()
+
+    def after_save_handler(self, path, filename):
         #Handler for  save button, saves the customised Turing machine to xml
         # Check if currently there is a xml file loaded
         # if there is currently a xml loaded, update the xml file in 1.xml
@@ -503,15 +526,30 @@ class Container(Widget):
         # If currently there is a xml loaded
         # get the current xml tree, and remove all the states
 
-        new_tree = self.generate_memory_etree()
+        if filename is not None and path is not None:
+            new_tree = self.generate_memory_etree()
 
-        xml = prettify(new_tree.getroot())
-        print xml
-        open('1.xml','w').write(xml)
-        self._popup = Popup(title="modifications saved in 1.xml",
-                            content=None,
-                            size_hint=(0.9,0.3))
-        self._popup.open()
+            xml = prettify(new_tree.getroot())
+            print xml
+
+            self._popup.dismiss()
+            if filename[-4::] != ".xml":
+                filename = filename + ".xml"
+            fn = os.path.join(path, filename)
+            print fn
+            try:
+                open(fn,'w').write(xml)
+                message = "File saved in " + str(filename)
+            except IOError:
+                print("Error")
+                message = "There was an error saving file. Please try again with a valid filename."
+
+            self._popup = Popup(title="Save File",
+                                content=Label(text=message),
+                                size_hint=(0.9,0.3))
+            self._popup.open()
+
+
 
 
     def generate_memory_etree(self):
@@ -619,7 +657,7 @@ class Container(Widget):
 
     def about_handler(self):
         content = BoxLayout(orientation="vertical")
-        content.add_widget(Label(text="TuringSim v0.1, \nby Loh Hao Bin, Ashley Ong Yik Mun & Varshinee Servansingh\nFIT3140 Advanced Programming, Semester 2, 2015"))
+        content.add_widget(Label(text="TuringSim v0.2, \nby Loh Hao Bin, Ashley Ong Yik Mun & Varshinee Servansingh\nFIT3140 Advanced Programming, Semester 2, 2015"))
 
         self._popup = Popup(title="About TuringSim",
                             content=content,
@@ -627,35 +665,40 @@ class Container(Widget):
 
         self._popup.open()
 
-
-    def tape_view_left(self):
-        pass
-
-    def tape_view_right(self):
-        pass
-
-
     def execute_handler(self,text):
         if text == "Execute":
-
+            if self.edit_mode is True:
+                self.edit_mode_controller(False)
+            self.machine.reset_execution()
             self.execute()
 
         elif text == "Stop":
             self.execute_stop()
 
     def execute(self, value=None):
-        self.ids.execute_button.text = "Stop"
         if self.machine.current_state is not None:
-                self.machine.current_state.execute_current_state_restore()
-        if self.machine.is_halted() is False:
-            self.machine.execute()
-            self.redraw_tape()
-            self.machine.current_state.execute_current_state()
-            self._event = Clock.schedule_once(self.execute, 0.6)
-        else:
-            self.execute_stop()
-            answer = self.machine.check_halt_answer()
+            self.ids.edit_button.disabled = True
+            self.ids.save_button.disabled = True
+            self.ids.execute_button.text = "Stop"
+            self.machine.current_state.execute_current_state_restore()
+            if self.machine.is_halted() is False:
+                self.machine.execute()
+                self.redraw_tape()
+                self.machine.current_state.execute_current_state()
+                if value != "step_mode":
+                    self._event = Clock.schedule_once(self.execute, 0.6)
+            else:
+                self.execute_stop()
+                self.machine.check_halt_answer()
 
     def execute_stop(self):
-        self.ids.execute_button.text = "Execute"
-        Clock.unschedule(self._event)
+        if self._event is not None and self.machine.current_state is not None:
+            self.machine.current_state.execute_current_state_restore()
+            self.ids.execute_button.text = "Execute"
+            if self._event is not None:
+                Clock.unschedule(self._event)
+            self.ids.edit_button.disabled = False
+            self.ids.save_button.disabled = False
+
+    def step_through_handler(self):
+        self.execute("step_mode")

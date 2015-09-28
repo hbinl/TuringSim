@@ -32,6 +32,10 @@ class Container(Widget):
 
     class Machine():
         def __init__(self,blankchar="b"):
+            """
+            @purpose Initialise the Machine class used to keep track of states. The tape starts off with a blank cell.
+            :param blankchar: The blank character representation to use.
+            """
             self.states = {}
             self.transitions = {}
             self.starting = None
@@ -46,24 +50,51 @@ class Container(Widget):
 
 
         def is_halted(self):
+            """
+            @purpose Returns halted in boolean
+            """
             return self.halted
 
         def halt(self):
+            """
+            @purpose Sets halt to True
+            """
             self.halted = True
 
         def set_tape(self, tape):
+            """
+            @purpose Sets the tape to the initial tape
+            :param tape: Takes in the initial tape
+            :return:
+            """
             self.tape.init_tape(tape)
 
         def set_blank_char(self, char):
+            """
+            @purpose Sets the blankchar to char
+            :param char: Takes in character 'b'
+            :return:
+            """
             self.blankchar = char
 
         def get_tape(self):
+            """
+            @purpose Returns the whole tape
+            """
             return self.tape.print_tape()
 
         def get_current_tape_head_pos(self):
+            """
+            @purpose Returns the current tape head position
+            """
             return self.tape.get_head_pos()
 
         def set_starting(self, id):
+            """
+            @purpose Set the current state to the staring state
+            :param id: ID of the state
+            :return:
+            """
             try:
                 self.starting = self.states[id]
                 if self.current_step == 0:
@@ -73,9 +104,15 @@ class Container(Widget):
                 raise Exception("State does not exist.")
 
         def get_starting_state(self):
+            """
+            @purpose Returns the starting state
+            """
             return self.starting
 
         def add_state(self, id, reference):
+            """
+            @purpose Prints the states image
+            """
             try:
                 print self.states[id]
                 raise Exception("State already exists.")
@@ -84,12 +121,24 @@ class Container(Widget):
                 print self.states
 
         def get_state(self, id):
+            """
+            @purpose Returns the state with the ID
+            :param id: ID of the state
+            """
             return self.states[id]
 
         def delete_state(self, id):
+            """
+            @purpose Deletes the state that was selected
+            :param id: ID of the state that was clicked on
+            :return:
+            """
             del self.states[id]
 
         def get_num_states(self):
+            """
+            @purpose Returns the number of states
+            """
             return len(self.states)
 
         def add_transition(self, origin, destination):
@@ -110,6 +159,9 @@ class Container(Widget):
             self.halted = False
 
         def execute(self):
+            """
+            @purpose When the "Execute" button is clicked, this will execute the Turing Machine
+            """
             self.increment_step()
             self.current_read = self.tape.read()
 
@@ -163,6 +215,9 @@ class Container(Widget):
             return self.tape.write(value)
 
         def check_halt_answer(self):
+            """
+            @purpose Check whether the Turing Machine halts with a "Yes" or a "No".
+            """
             print self.current_state.id
             if self.current_state.is_halt() is True:
                 content= Label(text="Halted with answer YES")
@@ -184,7 +239,7 @@ class Container(Widget):
         # Constructor
         super(Container, self).__init__(**kwargs)
 
-        # Initialise SpikeMachine class used to keep track of states
+        # Initialise Machine class used to keep track of states
         self.machine = self.Machine()
         self.xml_tree = None
 
@@ -356,8 +411,9 @@ class Container(Widget):
 
 
     def load_handler(self, obj):
-        # Purpose: Shows a file browser dialog for user to pick an XML file
-
+        """
+        @purpose Shows a file browser dialog for user to pick an XML file
+        """
         self._popup = Popup(title="Load a Turing Machine XML File",
                             content=BrowseFileChooserWindow(),
                             size_hint=(0.85, 0.85))
@@ -379,7 +435,9 @@ class Container(Widget):
         self.set_tape(None)
 
     def after_load_handler(self, obj):
-        # Purpose: To handle loading file and data from XML file
+        """
+        @purpose To handle loading file and data from XML file
+        """
 
         # Check if the user has selected a file to load from
         if obj.content.path is not None:
@@ -427,11 +485,17 @@ class Container(Widget):
 
 
     def reset_state_pos(self):
+        """
+        @purpose To reset the state position to the initial position
+        """
         self.state_y_pos = 100
         self.state_x_pos = 100
         self.state_y_hint = 0.1
 
     def update_state_pos(self):
+        """
+        @purpose To update the state position
+        """
         win_x, win_y = Window.size
         padding = 70
         self.state_x_pos += (self.state_size[0]+padding)
@@ -441,6 +505,9 @@ class Container(Widget):
             self.state_y_pos = win_y*self.state_y_hint
 
     def create_state(self, name, halting):
+        """
+        @purpose Creating states
+        """
         # Initialising appearance variables for States
         if len(name) > 0:
             board = self.ids.layout_states
@@ -489,9 +556,16 @@ class Container(Widget):
         self._popup.open()
 
     def get_starting_state(self):
+        """
+        @purpose Returns the starting state
+        """
         return self.machine.get_starting_state()
 
     def set_starting_state(self, state):
+        """
+        @purpose: Set the new starting state to the one that was clicked on
+        :param state: Takes in the state that was clicked on
+        """
         old = self.machine.get_starting_state()
         if old is not None:
             arrow = old.remove_start_arrow()
@@ -509,13 +583,21 @@ class Container(Widget):
         self._popup.dismiss()
 
     def save_handler(self):
-        # pops up the Save window
+        """
+        @purpose: Pops up the Save window
+        """
         content = SaveFileChooserWindow(save=self.after_save_handler, cancel=self.dismiss_popup)
         self._popup = Popup(title="Save file", content=content,
                             size_hint=(0.9, 0.9))
         self._popup.open()
 
     def after_save_handler(self, path, filename):
+        """
+        @purpose: Saves the Turing Machine to an XML file
+        :param path: Takes in the path
+        :param filename: Takes in the filename that was keyed in
+        :return:
+        """
         #Handler for  save button, saves the customised Turing machine to xml
         # Check if currently there is a xml file loaded
         # if there is currently a xml loaded, update the xml file in 1.xml
@@ -553,6 +635,9 @@ class Container(Widget):
 
 
     def generate_memory_etree(self):
+        """
+        @purpose: Convert XML file to the Element Tree
+        """
         if self.xml_tree is not None:
             xml_tree = self.xml_tree
         else:
@@ -595,7 +680,10 @@ class Container(Widget):
         return xml_tree
 
     def edit_handler(self, button):
-        # Handles the edit button click
+        """
+        @purpose: Handles the edit button click
+        """
+
         # Condition checks if we are currently in edit mode
         if self.edit_mode is True:
             self.edit_mode_controller(False)
@@ -604,6 +692,9 @@ class Container(Widget):
 
 
     def edit_mode_controller(self, flag):
+        """
+        @purpose: Change the Edit button text.
+        """
         button = self.ids.edit_button
 
         if flag is False:
@@ -637,6 +728,11 @@ class Container(Widget):
 
 
     def zoom_handler(self, text):
+        """
+        @purpose: Handles the zoom buttons
+        :param text: Takes in the zoom text
+        :return:
+        """
         if text == "Zoom In":
             if self.ids.layout_states.scale < 3.05175:
                 mat = Matrix().scale(1.25,1.25,1.25)
@@ -648,6 +744,9 @@ class Container(Widget):
 
 
     def zoom_reset(self):
+        """
+        @purpose: Reset the states to the original position
+        """
         self.ids.layout_states.pos = [0,0]
         self.zoom_counter = 0
         factor = 1/self.ids.layout_states.scale
@@ -656,6 +755,9 @@ class Container(Widget):
 
 
     def about_handler(self):
+        """
+        @purpose: Handles the 'About' button
+        """
         content = BoxLayout(orientation="vertical")
         content.add_widget(Label(text="TuringSim v0.2, \nby Loh Hao Bin, Ashley Ong Yik Mun & Varshinee Servansingh\nFIT3140 Advanced Programming, Semester 2, 2015"))
 
@@ -666,6 +768,11 @@ class Container(Widget):
         self._popup.open()
 
     def execute_handler(self,text):
+        """
+        @purpose: Handles the 'Execute' button
+        :param text: Takes in the text button
+        :return:
+        """
         if text == "Execute":
             if self.edit_mode is True:
                 self.edit_mode_controller(False)
@@ -676,6 +783,9 @@ class Container(Widget):
             self.execute_stop()
 
     def execute(self, value=None):
+        """
+        @purpose: Executes the Turing Machine.
+        """
         if self.machine.current_state is not None:
             self.ids.edit_button.disabled = True
             self.ids.save_button.disabled = True

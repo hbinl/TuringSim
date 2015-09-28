@@ -44,7 +44,9 @@ class UIObj_State(Widget):
 
 
     def __init__(self, **kwargs):
-        # initialising some basic information about the states
+        """
+        @purpose: Initialising some basic information about the states
+        """
         self.kw = kwargs
 
         self.transitions = {}
@@ -73,8 +75,9 @@ class UIObj_State(Widget):
 
 
     def on_touch_down(self, touch):
-        # handler for touch events, using collide point to check if inside State boundary
-
+        """
+        @purpose: Handler for touch events, using collide point to check if inside State boundary
+        """
         if self.collide_point(touch.x,touch.y):
             if self.get_parent_window().children[0].edit_mode:
                 touch.grab(self)
@@ -90,7 +93,9 @@ class UIObj_State(Widget):
 
 
     def on_touch_move(self, touch):
-        # when it moves...
+        """
+        @purpose: when the State moves
+        """
         if touch.grab_current is self:
 
             self.pos = touch.x-25, touch.y-25
@@ -106,6 +111,9 @@ class UIObj_State(Widget):
                     incoming.redraw()
 
     def execute_current_state(self):
+        """
+        @purpose: To highlight the State in green, when the Turing Machine simulator is runnning.
+        """
         self.canvas.before.clear()
         self.canvas.before.add(Color(0,1,0))
         self.canvas.before.add(Ellipse(pos=(self.pos[0]-10,self.pos[1]-10), size=(self.size[0]+20,self.size[1]+20)))
@@ -116,6 +124,9 @@ class UIObj_State(Widget):
 
 
     def on_touch_up(self, touch):
+        """
+        @purpose: When the user release the State object
+        """
         # upon user's release of the item
         if touch.grab_current is self:
             touch.ungrab(self)
@@ -150,30 +161,54 @@ class UIObj_State(Widget):
             self.get_parent_window().children[0].select(None)
 
     def add_start_arrow(self, arrow_reference):
+        """
+        @purpose: Add the starting arrow for the starting State
+        """
         self.start_arrow = arrow_reference
 
     def update_start_arrow(self, touch):
+        """
+        @purpose: Updates the starting arrow
+        """
         self.start_arrow.redraw(touch)
 
     def remove_start_arrow(self):
+        """
+        @purpose: Remove the old starting arrow
+        """
         old = self.start_arrow
         self.start_arrow = None
         return old
 
     def get_transitions(self):
+        """
+        @purpose: Returns Transition
+        """
         return self.transitions
 
     def quick_set_transitions(self, tran):
+        """
+        @purpose: Set transitions to tran
+        """
         self.transitions = tran
 
     def get_center(self):
+        """
+        @purpose: Returns center
+        """
         return self.center
 
     def add_incoming_transition(self, tran):
+        """
+        @purpose: Add transition
+        """
         self.incoming_transitions.append(tran)
 
 
     def update_transitions_nodes(self):
+        """
+        @purpose: Updates the transition
+        """
         for key,value in self.transitions.iteritems():
             for t in value:
                 t.update_origin(self)
@@ -182,6 +217,9 @@ class UIObj_State(Widget):
 
 
     def remove_self(self):
+        """
+        @purpose: Delete transition
+        """
         print("X")
         for key,value in self.transitions.iteritems():
             for t in value:
@@ -213,6 +251,9 @@ class UIObj_State_Halting(UIObj_State):
 
 
 class UIObj_Transition(Widget):
+    """
+    @purpose UI Object class for Transition visual representation
+    """
     transition = ObjectProperty(None)
 
     def __init__(self, **kwargs):
@@ -241,24 +282,45 @@ class UIObj_Transition(Widget):
         self.redraw()
 
     def get_loop(self):
+        """
+        @purpose: Returns loop
+        """
         return self.loop
 
     def get_seen(self):
+        """
+        @purpose: Returns seen
+        """
         return self.seen
 
     def get_origin(self):
+        """
+        @purpose: Returns the start node
+        """
         return self.start_node
 
     def get_end(self):
+        """
+        @purpose: Returns the end node
+        """
         return self.end_node
 
     def get_write(self):
+        """
+        @purpose: Returns write
+        """
         return self.write
 
     def get_move(self):
+        """
+        @purpose: Returns move
+        """
         return self.move
 
     def redraw(self):
+        """
+        @purpose: Redraw a transition
+        """
         if self.loop:
             self.canvas.before.clear()
             self.canvas.before.add(Color(0,0,0))
@@ -286,9 +348,15 @@ class UIObj_Transition(Widget):
             self.children[0].pos =  (self.start_node.get_center()[0]+self.end_node.get_center()[0])/2+self.offset,  (self.start_node.get_center()[1]+self.end_node.get_center()[1])/2+self.offset
 
     def update_origin(self, node):
+        """
+        @purpose: Updates the start node
+        """
         self.start_node = node
 
     def update_end(self, node):
+        """
+        @purpose: Updates the end node
+        """
         self.end_node = node
 
     def execute_highlight(self):
@@ -300,9 +368,15 @@ class UIObj_Transition(Widget):
 
 
 class UIObj_StartArrow(Widget):
+    """
+    @purpose UI Object class for States' visual representation
+    """
     start = ObjectProperty(None)
 
     def __init__(self, **kwargs):
+        """
+        @purpose: Initialising some basic information about the Start Arrow
+        """
         self.node = kwargs.get('node',0)
         self.origin_x = self.node.x+15
         self.origin_y = self.node.y+80
@@ -311,6 +385,9 @@ class UIObj_StartArrow(Widget):
         self.redraw(None)
 
     def redraw(self, node):
+        """
+        @purpose: Redraw the new Start Arrow
+        """
         if node is not None:
             self.origin_x = node[0]+15
             self.origin_y = node[1]+80

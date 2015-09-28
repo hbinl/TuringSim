@@ -8,7 +8,9 @@ from kivy.properties import ObjectProperty
 from ui_lib import *
 
 class UIObj_Edit(Widget):
-    # This object is for edit mode toolbar usage
+    """
+    @ purpose: This object is for edit mode toolbar usage
+    """
     edit = ObjectProperty(None)
     size = Window.size[0], 100
 
@@ -20,6 +22,9 @@ class UIObj_Edit(Widget):
         pass
 
     def add_state(self):
+        """
+        @purpose: When 'Add State' button is clicked on, a pop window will pop up and ask for a Transition name.
+        """
         content = BoxLayout(orientation="vertical")
         textinput = TextInput(hint_text='State Name', multiline=False, id='textinput')
         button = Button(text="Add State")
@@ -34,6 +39,11 @@ class UIObj_Edit(Widget):
         self._popup.open()
 
     def on_enter_add(self, value):
+        """
+        @purpose: Add new state
+        :param value: the new transition name that was keyed in
+        :return:
+        """
         halting = False
         self.add_state_handler(self._popup.content.children[1].text, halting)
 
@@ -42,6 +52,9 @@ class UIObj_Edit(Widget):
         self.add_state_handler(self._popup.content.children[1].text, halting)
 
     def add_state_handler(self, name, halting):
+        """
+        @purpose: Get in the new text input. If theres no input, the text window title will change to "Name Error"
+        """
         try:
             self.parent.create_state(name, halting)
             self._popup.dismiss()
@@ -50,6 +63,10 @@ class UIObj_Edit(Widget):
             self._popup.content.children[1].text = ""
 
     def delete_state(self):
+        """
+        @purpose: To delete a state. When the 'Delete State' button is clicked on, a window will pop up.
+        :return:
+        """
         selection = self.get_parent_window().children[0].get_selection()
         if selection is not None:
             content = BoxLayout(orientation="horizontal")
@@ -75,10 +92,17 @@ class UIObj_Edit(Widget):
             self._popup.open()
 
     def delete_state_proceed(self, value):
+        """
+        @purpose: Deletes the selected state
+        """
         self.parent.remove_selected_state()
         self._popup.dismiss()
 
     def add_tran_button(self):
+        """
+        @purpose: To add transition. When add Transition button is clicked on, a window will pop up
+        :return:
+        """
         selection = self.get_parent_window().children[0].get_selection()
         if selection is not None:
             content = BoxLayout(orientation="vertical")
@@ -108,6 +132,9 @@ class UIObj_Edit(Widget):
             self._popup.open()
 
     def on_ok_button_add_tran(self, value):
+        """
+        @purpose: Get all the text input of 'Destination State', 'Read', 'Write' and 'Move'.
+        """
         self._popup.dismiss()
         print("x")
 
@@ -119,6 +146,10 @@ class UIObj_Edit(Widget):
         self.parent.add_transition(None, end, seen, write, move)
 
     def make_initial_state(self):
+        """
+        @purpose: Make a new starting State
+        :return:
+        """
         selection = self.get_parent_window().children[0].get_selection()
         if selection is not None:
             self.parent.set_starting_state(self.parent.get_selection())
@@ -129,6 +160,10 @@ class UIObj_Edit(Widget):
             self._popup.open()
 
     def make_halting_state(self):
+        """
+        @purpose: Make a new halting state
+        :return:
+        """
         selection = self.get_parent_window().children[0].get_selection()
         if selection is not None:
             self.parent.set_selected_halting_state()
@@ -139,6 +174,10 @@ class UIObj_Edit(Widget):
             self._popup.open()
 
     def set_tape(self):
+        """
+        @purpose: Set a new customize Tape
+        :return:
+        """
         content = BoxLayout(orientation="vertical")
         textinput = TextInput(hint_text='Use b for blank, e.g bb010101bbb', multiline=False, id='textinput')
         button = Button(text="Set Tape")
@@ -152,6 +191,9 @@ class UIObj_Edit(Widget):
         self._popup.open()
 
     def on_ok_button_set_tape(self, value):
+        """
+        @purpose: Set the new Tape display
+        """
         tape = self._popup.content.children[1].text
 
         self._popup.dismiss()

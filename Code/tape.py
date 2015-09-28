@@ -39,6 +39,9 @@ class Tape():
         self.tape = deque(tape)
 
     def get_head_pos(self):
+        """
+        @purpose Return the tape head position
+        """
         return self.head_pos
 
     def print_tape(self):
@@ -53,6 +56,9 @@ class Tape():
         return final
 
     def move_right(self):
+        """
+        @purpose Moves the tape head to the right by 1
+        """
         self.tape.rotate(-1)
         self.head_pos += 1
         if self.head_pos >= len(self.tape):
@@ -60,6 +66,9 @@ class Tape():
             self.tape.rotate(1)
 
     def move_left(self):
+        """
+        @purpose Moves the tape head to the left by 1
+        """
         self.head_pos -= 1
         if self.head_pos < 0:
             #self.tape.rotate(-1)
@@ -81,12 +90,12 @@ class Tape():
 
     def read(self):
         """
-        @purpose returns the data stored on tape at head position
+        @purpose Returns the data stored on tape at head position
         """
         return self.tape[0]
 
     def __len__(self):
         """
-        @purpose overloading the length operator to get the current visible length of tape
+        @purpose Overloading the length operator to get the current visible length of tape
         """
         return len(self.tape)

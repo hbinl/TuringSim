@@ -24,6 +24,9 @@ import os
 import xml.etree.ElementTree as ET
 
 class HomeScreenWindow(FloatLayout):
+    """
+    @purpose A FloatLayout for implementing Load file dialogs
+    """
     load = ObjectProperty(None)
     cancel = ObjectProperty(None)
     path = None

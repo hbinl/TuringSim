@@ -153,6 +153,7 @@ class Container(Widget):
             pass
 
         def reset_execution(self):
+            # Resets the execution state of the turing machine
             self.current_step = 0
             self.current_read = None
             self.current_state = self.starting

@@ -9,7 +9,7 @@
 from kivy.uix.button import Button
 from kivy.graphics.transformation import Matrix
 from kivy.clock import Clock
-
+import random
 
 from ui_dialog import *
 from ui_edit import *
@@ -46,8 +46,8 @@ class Container(Widget):
             self.current_step = 0
             self.current_state = self.starting
             self.current_read = None
+            self.current_transition = None
             self.halted = False
-
 
         def is_halted(self):
             """
@@ -157,19 +157,28 @@ class Container(Widget):
             self.current_step = 0
             self.current_read = None
             self.current_state = self.starting
+            self.current_transition = None
             self.halted = False
 
         def execute(self):
             """
-            @purpose When the "Execute" button is clicked, this will execute the Turing Machine
+            @purpose When the "Execute" button is clicked, this will execute the Turing Machine by one step
             """
+            if self.current_transition is not None:
+                self.current_transition.execute_unhighlight()
             self.increment_step()
             self.current_read = self.tape.read()
 
             transitions = self.current_state.get_transition_seen(self.current_read)
             #print self.current_read
-            for tran in transitions:
-                tran.execute_highlight()
+
+            print transitions
+            if len(transitions) > 0:
+                tran = random.choice(transitions)
+
+                #for tran in transitions:
+                self.current_transition = tran
+                self.current_transition.execute_highlight()
                 self.current_state = tran.get_end()
                 self.write_current_pos(tran.get_write())
                 move = tran.get_move()
@@ -181,7 +190,7 @@ class Container(Widget):
                 elif move == "N":
                     pass
 
-            print(self.tape.head_pos, self.tape.tape)
+                print(self.tape.head_pos, self.tape.tape)
 
 
             if len(transitions) == 0:
@@ -248,6 +257,7 @@ class Container(Widget):
         self.edit_mode = False
         self.edit_mode_selected_state = None
         self._popup = None
+        self.stepping = False
 
         # Initialise variables for use with Scatterlayout, setting maximum/min scaling,
         # Disabling single finger move canvas, disabling rotation
@@ -532,6 +542,7 @@ class Container(Widget):
 
 
     def close_handler(self):
+        self.execute_stop()
         content = BoxLayout(orientation="vertical")
         content.add_widget(Label(text="Are you sure you want to close the TM?"))
         content_box = BoxLayout(orientation="horizontal")
@@ -625,7 +636,7 @@ class Container(Widget):
                 message = "File saved in " + str(filename)
             except IOError:
                 print("Error")
-                message = "There was an error saving file. Please try again with a valid filename."
+                message = "There was an error saving file. Please try again with a valid path or filename."
 
             self._popup = Popup(title="Save File",
                                 content=Label(text=message),
@@ -760,7 +771,7 @@ class Container(Widget):
         @purpose: Handles the 'About' button
         """
         content = BoxLayout(orientation="vertical")
-        content.add_widget(Label(text="TuringSim v0.2, \nby Loh Hao Bin, Ashley Ong Yik Mun & Varshinee Servansingh\nFIT3140 Advanced Programming, Semester 2, 2015"))
+        content.add_widget(Label(text="TuringSim v0.3, \nby Loh Hao Bin, Ashley Ong Yik Mun & Varshinee Servansingh\nFIT3140 Advanced Programming, Semester 2, 2015"))
 
         self._popup = Popup(title="About TuringSim",
                             content=content,
@@ -777,7 +788,8 @@ class Container(Widget):
         if text == "Execute":
             if self.edit_mode is True:
                 self.edit_mode_controller(False)
-            self.machine.reset_execution()
+            if self.stepping is False:
+                self.machine.reset_execution()
             self.execute()
 
         elif text == "Stop":
@@ -790,26 +802,31 @@ class Container(Widget):
         if self.machine.current_state is not None:
             self.ids.edit_button.disabled = True
             self.ids.save_button.disabled = True
-            self.ids.execute_button.text = "Stop"
+
             self.machine.current_state.execute_current_state_restore()
             if self.machine.is_halted() is False:
                 self.machine.execute()
                 self.redraw_tape()
                 self.machine.current_state.execute_current_state()
                 if value != "step_mode":
-                    self._event = Clock.schedule_once(self.execute, 0.6)
+                    self.ids.execute_button.text = "Stop"
+                    self.ids.step_button.disabled = True
+                    self._event = Clock.schedule_once(self.execute, 0.5)
             else:
                 self.execute_stop()
                 self.machine.check_halt_answer()
 
     def execute_stop(self):
-        if self._event is not None and self.machine.current_state is not None:
-            self.machine.current_state.execute_current_state_restore()
+        # self._event is not None and
+        if self.machine.current_state is not None:
+            #self.machine.current_state.execute_current_state_restore()
             self.ids.execute_button.text = "Execute"
             if self._event is not None:
                 Clock.unschedule(self._event)
             self.ids.edit_button.disabled = False
+            self.ids.step_button.disabled = False
             self.ids.save_button.disabled = False
 
     def step_through_handler(self):
+        self.stepping = True
         self.execute("step_mode")

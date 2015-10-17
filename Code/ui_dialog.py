@@ -30,6 +30,13 @@ class HomeScreenWindow(FloatLayout):
     load = ObjectProperty(None)
     cancel = ObjectProperty(None)
     path = None
+    string = "TuringSim v0.3\n" +\
+    "Developed by Loh Hao Bin, Ashley Ong Yik Mun & Varshinee Servansingh \n" +\
+    "FIT3140 Advanced Programming, Semester 2, 2015\n\n" +\
+    "TuringSim supports loading and saving programs, executing, stepping, and creating custom programs.\n"+\
+    "TuringSim supports deterministic and non-deterministic Turing Machines. \n\n" +\
+    "Please select one of the option below to proceed."
+
 
 
 class SaveFileChooserWindow(FloatLayout):

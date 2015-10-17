@@ -29,7 +29,7 @@ from kivy.properties import ObjectProperty
 import ui_edit
 from kivy.clock import Clock
 
-
+import math
 
 
 class UIObj_State(Widget):
@@ -333,19 +333,65 @@ class UIObj_Transition(Widget):
                                                 self.end_node.get_center()[0],
                                                 self.end_node.get_center()[1]),
                                  width=1))
-            self.children[0].pos =  (self.start_node.get_center()[0]+self.end_node.get_center()[0])/2+120+self.offset,  (self.start_node.get_center()[1]+self.end_node.get_center()[1])/2+57+self.offset
+
+            center_line_x = self.end_node.get_center()[0]+30
+            center_line_y = self.end_node.get_center()[1]+35
+            self.canvas.before.add(Triangle(points=(center_line_x,
+                                                    center_line_y,
+                                                    center_line_x+20,
+                                                    center_line_y,
+                                                    center_line_x,
+                                                    center_line_y+20)))
+
+
+            self.children[0].pos = (self.start_node.get_center()[0]+self.end_node.get_center()[0])/2+120+self.offset,  (self.start_node.get_center()[1]+self.end_node.get_center()[1])/2+57+self.offset
 
         else:
             self.canvas.before.clear()
             self.canvas.before.add(Color(0,0,0))
             self.canvas.before.add(Line(bezier=(self.start_node.get_center()[0],
                                                 self.start_node.get_center()[1],
-                                                (self.start_node.get_center()[0]+self.end_node.get_center()[0])/2+50,
-                                                (self.start_node.get_center()[1]+self.end_node.get_center()[1])/2+77,
+                                                (self.start_node.get_center()[0]+self.end_node.get_center()[0])/2+10,
+                                                (self.start_node.get_center()[1]+self.end_node.get_center()[1])/2+10,
                                                 self.end_node.get_center()[0],
                                                 self.end_node.get_center()[1]),
                                  width=1))
-            self.children[0].pos =  (self.start_node.get_center()[0]+self.end_node.get_center()[0])/2+self.offset,  (self.start_node.get_center()[1]+self.end_node.get_center()[1])/2+self.offset
+
+            a_x,a_y,b_x,b_y,c_x,c_y = self.calculate_edge_coordinate_for_arrow()
+            print "HUHUHU",self.end_node.get_center(),a_x,a_y,b_x,b_y,c_x,c_y
+
+            self.canvas.before.add(Color(0,0,0))
+            self.canvas.before.add(Triangle(points=(a_x,
+                                                    a_y,
+                                                    b_x,
+                                                    b_y,
+                                                    c_x,
+                                                    c_y)))
+
+
+            self.children[0].pos = (self.start_node.get_center()[0]+self.end_node.get_center()[0])/2+self.offset,  (self.start_node.get_center()[1]+self.end_node.get_center()[1])/2+self.offset
+
+
+    def calculate_edge_coordinate_for_arrow(self):
+        begin_center = self.start_node.get_center()
+        end_center = self.end_node.get_center()
+        midpoint = ((begin_center[0]+end_center[0])/2, (begin_center[1]+end_center[1])/2)
+
+        dx = midpoint[0] - end_center[0]
+        dy = midpoint[1] - end_center[1]
+
+        #m = dy/dx
+        #m_rad = math.atan(m)
+        m_rad = math.atan2(dy,dx)
+
+        a_x = end_center[0] + 50 * math.cos(m_rad)
+        a_y = end_center[1] + 50 * math.sin(m_rad)
+        b_x=a_x+20*math.cos(m_rad+1)
+        b_y=a_y+20*math.sin(m_rad+1)
+        c_x=a_x+20*math.cos(m_rad-1)
+        c_y=a_y+20*math.sin(m_rad-1)
+
+        return int(a_x),int(a_y),int(b_x),int(b_y),int(c_x),int(c_y)
 
     def update_origin(self, node):
         """
@@ -361,7 +407,7 @@ class UIObj_Transition(Widget):
 
     def execute_highlight(self):
         self.children[0].color = (0,1,0.5,1)
-        Clock.schedule_once(self.execute_unhighlight,1)
+        #Clock.schedule_once(self.execute_unhighlight,1)
 
     def execute_unhighlight(self, value=None):
         self.children[0].color = (1,1,1,1)

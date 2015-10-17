@@ -31,7 +31,7 @@ class UIObj_Edit(Widget):
         content.add_widget(textinput)
         content.add_widget(button)
 
-        self._popup = Popup(title="Enter New Transition Name",
+        self._popup = Popup(title="Enter New State Name",
                             content=content,
                             size_hint=(0.3, 0.3))
         textinput.bind(on_text_validate=self.on_enter_add)
@@ -59,7 +59,7 @@ class UIObj_Edit(Widget):
             self.parent.create_state(name, halting)
             self._popup.dismiss()
         except Exception:
-            self._popup.title = "Name Error"
+            self._popup.title = "Name Error, Please enter a name that hasn't been used"
             self._popup.content.children[1].text = ""
 
     def delete_state(self):
@@ -87,8 +87,8 @@ class UIObj_Edit(Widget):
 
         else:
             self._popup = Popup(title="Warning",
-                                content=Label(text="Please select a state"),
-                                size_hint=(0.3, 0.3))
+                                content=Label(text="Please select a state to be deleted."),
+                                size_hint=(0.8, 0.3))
             self._popup.open()
 
     def delete_state_proceed(self, value):
@@ -127,8 +127,8 @@ class UIObj_Edit(Widget):
             self._popup.open()
         else:
             self._popup = Popup(title="Warning",
-                                content=Label(text="Please select a state"),
-                                size_hint=(0.3, 0.3))
+                                content=Label(text="Please select a state to create a transition from."),
+                                size_hint=(0.8, 0.3))
             self._popup.open()
 
     def on_ok_button_add_tran(self, value):
@@ -155,8 +155,8 @@ class UIObj_Edit(Widget):
             self.parent.set_starting_state(self.parent.get_selection())
         else:
             self._popup = Popup(title="Warning",
-                                content=Label(text="Please select a state"),
-                                size_hint=(0.3, 0.3))
+                                content=Label(text="Please select a state to be made Starting."),
+                                size_hint=(0.8, 0.3))
             self._popup.open()
 
     def make_halting_state(self):
@@ -169,8 +169,8 @@ class UIObj_Edit(Widget):
             self.parent.set_selected_halting_state()
         else:
             self._popup = Popup(title="Warning",
-                                content=Label(text="Please select a state"),
-                                size_hint=(0.3, 0.3))
+                                content=Label(text="Please select a state to be made Halting/Accepting."),
+                                size_hint=(0.8, 0.3))
             self._popup.open()
 
     def set_tape(self):
@@ -184,9 +184,9 @@ class UIObj_Edit(Widget):
         content.add_widget(textinput)
         content.add_widget(button)
 
-        self._popup = Popup(title="Set custom tape",
+        self._popup = Popup(title="Set custom tape, the head will be pointed to position 0",
                             content=content,
-                            size_hint=(0.4, 0.3))
+                            size_hint=(0.8, 0.3))
         button.bind(on_release=self.on_ok_button_set_tape)
         self._popup.open()
 

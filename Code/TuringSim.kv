@@ -84,17 +84,16 @@
                 font_size: 25
 
 
-            Button:
-                id: about_button
-                text: "About"
-                on_release: root.about_handler()
-                font_size: 25
+#            Button:
+#                id: about_button
+#                text: "About"
+#                on_release: root.about_handler()
+#                font_size: 25
 
         BoxLayout:
             id: tape_layout
             size_hint_y: 0.07
             pos_hint: {'y':0.84, 'x':0.05}
-            height: sp(86)
             orientation: 'horizontal'
             ScrollView:
                 size_hint: None, None
@@ -115,7 +114,7 @@
                         size: 550, 80
                 Label:
                     padding: (20,10)
-                    text:"0011100001010000000000000000000000000000000000000000000000000000000000"
+                    text:"bbbbbbbbbb"
                     font_size: 35
                     color: 0,0,0,1
                     #text_size: None, self.height  # Set the text wrap box height
@@ -232,11 +231,7 @@
             size_hint_y: 0.5
             orientation: "vertical"
             Label:
-                text: "Welcome to TuringSim - Iteration 1"
-            Label:
-                text:"TuringSim v0.2 by Loh Hao Bin, Ashley Ong Yik Mun & Varshinee Servansingh"
-            Label:
-                text:"FIT3140 Advanced Programming, Semester 2, 2015"
+                text: root.string
 
         BoxLayout:
             size_hint_y: 0.4
@@ -251,16 +246,16 @@
 
             orientation: "vertical"
             Button:
-                text: "Load from Turing Machine XML"
+                text: "Load a Turing Machine program from XML"
                 id: home_load
 
             Button:
-                text: "Create New Deterministic Turing Machine"
+                text: "Create New Turing Machine Program"
                 id: home_new_dtm
 
-            Button:
-                text: "TODO: Create New Non-Deterministic Turing Machine"
-                id: home_new_ndtm
+#            Button:
+#                text: "TODO: Create New Non-Deterministic Turing Machine"
+#                id: home_new_ndtm
 
 
 ###################### UIObjs

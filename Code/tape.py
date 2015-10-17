@@ -36,6 +36,7 @@ class Tape():
         should be used with TuringMachine.set_tape()
         :param tape: The string representation of a initial tape state
         """
+        self.head_pos = 0
         self.tape = deque(tape)
 
     def get_head_pos(self):

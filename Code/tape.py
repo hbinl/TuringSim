@@ -1,7 +1,8 @@
 """
-@title Turing Machine ADT v2
-@author Loh Hao Bin 25461257
-@date 01/08/2015
+@title FIT3140 Assignment 5
+@description Sprint 2
+@author Loh Hao Bin, Ashley Ong Yik Mun, Varshinee Devi Servansingh
+@date 17/10/2015
 @description A turing machine ADT used to abstract and store data for a TM simulation
             v2: Moved the execution functionality into the class (+1 OOP)
 """

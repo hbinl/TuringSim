@@ -1,8 +1,8 @@
 """
 @title FIT3140 Assignment 5
-@description Sprint 1
+@description Sprint 2
 @author Loh Hao Bin, Ashley Ong Yik Mun, Varshinee Devi Servansingh
-@date 1/9/2015
+@date 17/10/2015
 """
 from kivy.uix.widget import Widget
 from kivy.uix.label import Label

@@ -1,8 +1,8 @@
 """
 @title FIT3140 Assignment 5
-@description Sprint 1
+@description Sprint 2
 @author Loh Hao Bin, Ashley Ong Yik Mun, Varshinee Devi Servansingh
-@date 1/9/2015
+@date 17/10/2015
 """
 
 # Kivy Dependencies
@@ -48,6 +48,10 @@ class Container(Widget):
             self.current_read = None
             self.current_transition = None
             self.halted = False
+
+        def get_num_states(self):
+            # Returns the number of states currently in the machine
+            return len(self.states)
 
         def is_halted(self):
             """
@@ -280,7 +284,9 @@ class Container(Widget):
 
 
     def set_selected_halting_state(self):
+        # Sets the selected state as Halting
 
+        # First track all the incoming and outgoing transitions, as well as other state data
         selection = self.get_selection()
         transition = selection.get_transitions()
         incoming = selection.incoming_transitions
@@ -290,9 +296,12 @@ class Container(Widget):
         start_flag = False
         if selection == self.machine.get_starting_state():
             start_flag = True
+
+        # Then remove the currently selected state
         self.remove_selected_state(True)
 
 
+        # Now recreate another state based on the saved data, but make it halting instead
         new = self.create_state(arguments.get('id',0),True)
         new.pos = old_position
         new.children[0].pos = old_position
@@ -306,6 +315,9 @@ class Container(Widget):
 
 
     def select(self, new):
+        # Method for handling selection of a state
+        # Handles the updating of the Edit Mode menu as well
+
         edit_bar = self.children[0]
         if self.edit_mode is True:
             if new is None:
@@ -324,6 +336,8 @@ class Container(Widget):
                 edit_bar.ids.add_tran_button.text = "Transition " + new.id
 
     def set_tape(self, tape):
+        # Method to set the initial contents of the tape
+
         if tape is not None:
             self.machine.set_tape(tape)
             self.redraw_tape()
@@ -336,6 +350,8 @@ class Container(Widget):
 
 
     def redraw_tape(self):
+        # Method to update the visual display of the tape
+
         tape = self.machine.get_tape()
         if len(tape) < 15:
             for _ in range(15-len(tape)):
@@ -346,12 +362,16 @@ class Container(Widget):
         self.ids.tape_layout.children[0].children[0].text = tape
 
     def get_selection(self):
+        # Returns the currently selected state reference
         if self.edit_mode:
             return self.edit_mode_selected_state
         else:
             return None
 
     def remove_selected_state(self, replace_flag=False):
+        # Deletes the currently selected state
+        # Replace_Flag is true, used for cases where the state is being replaced with a halting/starting version
+
         if self.edit_mode_selected_state is not None:
             if replace_flag is False:
                 name = self.edit_mode_selected_state.id
@@ -367,6 +387,8 @@ class Container(Widget):
                 self.select(None)
 
     def add_transition(self, origin, end, seen, write, move):
+        # Add a transition, from origin, to the end state, when seen SYMBOL, write SYMBOL, and move direction L/R/N
+
         if origin is None:
             origin = self.get_selection().id
 
@@ -393,6 +415,7 @@ class Container(Widget):
 
 
     def home_screen(self, obj):
+        # Method to handle displaying of the main home menu for loading or creating new files
 
         if self._popup is not None:
             self._popup.dismiss()
@@ -404,12 +427,9 @@ class Container(Widget):
 
         load_button = self.home_popup.content.ids.home_load
         new_dtm_button = self.home_popup.content.ids.home_new_dtm
-        # new_ndtm_button = self.home_popup.content.ids.home_new_ndtm
 
         load_button.bind(on_release=self.load_handler)
         new_dtm_button.bind(on_release=self.create_new_handler)
-
-
 
         # Reveal dialog
         Clock.schedule_once(self.home_popup.open, 0.5)
@@ -437,6 +457,7 @@ class Container(Widget):
         self._popup.open()
 
     def reset_container(self):
+        # Method to reinitialise the display container
         self.xml_tree = None
         self.reset_state_pos()
         self.zoom_reset()
@@ -461,38 +482,43 @@ class Container(Widget):
             # reading from XML file
             xml_tree = ET.parse(obj.content.path)
             self.xml_tree = xml_tree
+            try:
+                self.machine = self.Machine(xml_tree.find("blank").attrib["char"])
 
-            self.machine = self.Machine(xml_tree.find("blank").attrib["char"])
+                xml_states = xml_tree.find("states")
 
-            xml_states = xml_tree.find("states")
+                end_states_names = []
+                for s in xml_tree.find("finalstates"):
+                    end_states_names.append(s.attrib["name"])
 
-            end_states_names = []
-            for s in xml_tree.find("finalstates"):
-                end_states_names.append(s.attrib["name"])
-
-            # Start looping through the XML file
-            for child in xml_states:
-                # If halt, create halt object, else create ordinary state object
-                if child.attrib["name"] in end_states_names:
-                    new = self.create_state(child.attrib["name"], True)
-                else:
-                    new = self.create_state(child.attrib["name"], False)
+                # Start looping through the XML file
+                for child in xml_states:
+                    # If halt, create halt object, else create ordinary state object
+                    if child.attrib["name"] in end_states_names:
+                        new = self.create_state(child.attrib["name"], True)
+                    else:
+                        new = self.create_state(child.attrib["name"], False)
 
 
-            initial_state_name = xml_tree.find("initialstate").attrib["name"]
-            start_node = self.machine.get_state(initial_state_name)
-            self.set_starting_state(start_node)
+                initial_state_name = xml_tree.find("initialstate").attrib["name"]
+                start_node = self.machine.get_state(initial_state_name)
+                self.set_starting_state(start_node)
 
-            for child in xml_states:
-                for tran in child:
-                    origin = child.attrib["name"]
-                    end = tran.attrib["newstate"]
-                    seen = tran.attrib["seensym"]
-                    write = tran.attrib["writesym"]
-                    move = tran.attrib["move"]
-                    self.add_transition(origin, end, seen, write, move)
+                for child in xml_states:
+                    for tran in child:
+                        origin = child.attrib["name"]
+                        end = tran.attrib["newstate"]
+                        seen = tran.attrib["seensym"]
+                        write = tran.attrib["writesym"]
+                        move = tran.attrib["move"]
+                        self.add_transition(origin, end, seen, write, move)
 
-            self.set_tape(xml_tree.find("initialtape").text)
+                self.set_tape(xml_tree.find("initialtape").text)
+            except AttributeError:
+                self._popup = Popup(title="Error Loading File",
+                                    content=Label(text="Please try again with a valid XML file."),
+                                    size_hint=(0.8, 0.3))
+                self._popup.open()
 
 
     def reset_state_pos(self):
@@ -705,7 +731,7 @@ class Container(Widget):
 
     def edit_mode_controller(self, flag):
         """
-        @purpose: Change the Edit button text.
+        @purpose: Shows or hides the edit mode toolbar.
         """
         button = self.ids.edit_button
 
@@ -735,8 +761,6 @@ class Container(Widget):
             bl.children[0].pos = 0,-100
             anim = Animation(x=0, y=0, duration=0.2)
             anim.start(bl.children[0])
-
-
 
 
     def zoom_handler(self, text):
@@ -799,27 +823,32 @@ class Container(Widget):
         """
         @purpose: Executes the Turing Machine.
         """
-        if self.machine.current_state is not None:
-            self.ids.edit_button.disabled = True
-            self.ids.save_button.disabled = True
+        if self.machine.get_num_states() > 0:
+            if self.machine.current_state is not None:
+                self.ids.edit_button.disabled = True
+                self.ids.save_button.disabled = True
 
-            self.machine.current_state.execute_current_state_restore()
-            if self.machine.is_halted() is False:
-                self.machine.execute()
-                self.redraw_tape()
-                self.machine.current_state.execute_current_state()
-                if value != "step_mode":
-                    self.ids.execute_button.text = "Stop"
-                    self.ids.step_button.disabled = True
-                    self._event = Clock.schedule_once(self.execute, 0.5)
-            else:
-                self.execute_stop()
-                self.machine.check_halt_answer()
+                self.machine.current_state.execute_current_state_restore()
+                if self.machine.is_halted() is False:
+                    self.machine.execute()
+                    self.redraw_tape()
+                    self.machine.current_state.execute_current_state()
+                    if value != "step_mode":
+                        self.ids.execute_button.text = "Stop"
+                        self.ids.step_button.disabled = True
+                        self._event = Clock.schedule_once(self.execute, 0.5)
+                else:
+                    self.execute_stop()
+                    self.machine.check_halt_answer()
+        else:
+            self._popup = Popup(title="No State Added",
+                                content=Label(text="Please add at least one state to proceed"),
+                                size_hint=(0.8, 0.3))
+            self._popup.open()
 
     def execute_stop(self):
         # self._event is not None and
         if self.machine.current_state is not None:
-            #self.machine.current_state.execute_current_state_restore()
             self.ids.execute_button.text = "Execute"
             if self._event is not None:
                 Clock.unschedule(self._event)

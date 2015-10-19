@@ -464,7 +464,7 @@ class Container(Widget):
         self.ids.layout_states.pos = (0,0)
         self.ids.layout_states.clear_widgets()
         self.machine = self.Machine()
-        self.set_tape(None)
+        self.set_tape("bbbbbbbb")
 
     def after_load_handler(self, obj):
         """
@@ -499,10 +499,12 @@ class Container(Widget):
                     else:
                         new = self.create_state(child.attrib["name"], False)
 
-
-                initial_state_name = xml_tree.find("initialstate").attrib["name"]
-                start_node = self.machine.get_state(initial_state_name)
-                self.set_starting_state(start_node)
+                try:
+                    initial_state_name = xml_tree.find("initialstate").attrib["name"]
+                    start_node = self.machine.get_state(initial_state_name)
+                    self.set_starting_state(start_node)
+                except KeyError:
+                    print("No starting state")
 
                 for child in xml_states:
                     for tran in child:
@@ -513,7 +515,7 @@ class Container(Widget):
                         move = tran.attrib["move"]
                         self.add_transition(origin, end, seen, write, move)
 
-                self.set_tape(xml_tree.find("initialtape").text)
+                self.set_tape(xml_tree.find("initialtape").text.strip(' \t\n\r'))
             except AttributeError:
                 self._popup = Popup(title="Error Loading File",
                                     content=Label(text="Please try again with a valid XML file."),
@@ -688,7 +690,7 @@ class Container(Widget):
             SubElement(xml_tree,"states")
             xml_tree = ElementTree(xml_tree)
 
-        xml_tree.find("initialtape").text = self.machine.get_tape()
+        xml_tree.find("initialtape").text = self.machine.get_tape().strip(' \t\n\r')
         if self.machine.get_starting_state() is not None:
             xml_tree.find("initialstate").attrib["name"] = self.machine.get_starting_state().id
         final = xml_tree.find("finalstates")

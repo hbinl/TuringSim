@@ -4,7 +4,8 @@
 @author Loh Hao Bin, Ashley Ong Yik Mun, Varshinee Devi Servansingh
 @date 17/10/2015
 """
-
+import kivy
+kivy.require('1.9.0')
 from kivy.app import App
 from ui_container import Container
 

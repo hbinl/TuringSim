@@ -1,0 +1,29 @@
+The filename is ./machines/flipper.xml
+Blank char:  b
+Steps:  0
+State:  0
+Tape:  [1]010101
+
+Steps:  1
+State:  1
+Tape:  1[0]10101
+
+Steps:  2
+State:  2
+Tape:  1[1]10101
+
+Steps:  3
+State:  2
+Tape:  [1]310101
+
+Steps:  4
+State:  2
+Tape:  [b]3310101
+
+Steps:  5
+State:  halt
+Tape:  b[3]310101
+
+halted with answer yes
+
+Process finished with exit code 0

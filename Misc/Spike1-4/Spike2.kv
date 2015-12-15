@@ -1,0 +1,214 @@
+#:kivy 1.9.0
+<Container>:
+    RelativeLayout:
+        size:root.size
+        pos: root.pos
+        orientation: 'vertical'
+        id: container_rl
+
+        BoxLayout:
+            size_hint_y: 0.85
+            pos_hint: {'y':0}
+
+            ScatterLayout:
+                size_hint: (2,2)
+                id: layout_states
+                bcolor: 0.7, 0.7, 0.7, 1
+                canvas.before:
+                    Color:
+                        rgba: self.bcolor
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+#        BoxLayout:
+#            size_hint_y: 0.05
+#            pos_hint: {'y':0.85}
+#            bcolor: 0.3, 0.3, 0.3,1
+#            orientation: 'horizontal'
+#            canvas.before:
+#                Color:
+#                    rgba: self.bcolor
+#                Rectangle:
+#                    pos: self.pos
+#                    size: self.size
+
+        BoxLayout:
+            size_hint_y: 0.1
+            pos_hint: {'y':0.9}
+            orientation: 'horizontal'
+            Button:
+                id: load_button
+                text: "Load XML"
+                on_press: root.load_handler(self.text)
+
+            Button:
+                id: savexml_button
+                text: "Spike1 SaveXML"
+                on_press: root.savexml_handler(self.text)
+
+            Button:
+                id: zoom_button
+                text: "+ Zoom"
+                on_press: root.zoomplus_handler()
+
+            Button:
+                id: zoomout_button
+                text: "- Zoom"
+                on_press: root.zoomminus_handler()
+
+            Button:
+                id: edit_button
+                text: "Edit"
+                on_press: root.edit_handler(self)
+
+            Button:
+                id: save_button
+                text: "Save/Update XML"
+                on_press: root.save_handler(self.text)
+
+
+<SaveFileChooserWindow>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+
+        BoxLayout:
+            size: root.size
+            pos: root.pos
+            padding: [0,30,0,30]
+            FileChooserListView:
+                size: root.size
+                pos: root.pos
+                id: savefilechooser
+
+        BoxLayout:
+            size_hint_y: 0.1
+
+            Button:
+                text: "Cancel"
+                on_release: root.cancel_dialog()
+
+            Button:
+                text: "Save"
+                on_release: root.save_file(savefilechooser.path, savefilechooser.selection)
+
+
+<BrowseFileChooserWindow>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+
+        BoxLayout:
+            size: root.size
+            pos: root.pos
+            padding: [0,30,0,30]
+            FileChooserListView:
+                size: root.size
+                pos: root.pos
+                id: filechooser
+
+        BoxLayout:
+            size_hint_y: 0.1
+
+            Button:
+                text: "Cancel"
+                on_release: root.cancel_dialog()
+
+            Button:
+                text: "Load"
+                on_release: root.load_file(filechooser.path, filechooser.selection)
+
+
+<UIObj_State@Widget>:
+    canvas:
+        Color:
+            rgba: 0.1,0.1,0.1,1
+        Ellipse:
+            pos: self.pos
+            size: self.size
+
+<UIObj_State_Template>:
+    canvas.before:
+        Color:
+            rgba: 0.4,0.4,0.4,0.2
+        Ellipse:
+            pos: self.pos
+            size: self.size
+
+    canvas:
+        Color:
+            rgba: 0.4,0.7,0.1,1
+        Ellipse:
+            pos: self.pos
+            size: self.size
+
+
+<UIObj_State_Halting>:
+    canvas:
+        Color:
+            rgba: 0.1,0.1,0.1,1
+        Ellipse:
+            pos: self.pos
+            size: self.size
+        Color:
+            rgba: 0.4,0.4,0.4,1
+        Ellipse:
+            pos: (self.pos[0] + self.size[0]*0.05, self.pos[1] + self.size[1]*0.05)
+            size: (self.size[0] * 0.9, self.size[1] * 0.9)
+
+
+<UIObj_Edit>:
+    pos: (0,-100)
+    canvas.before:
+        Color:
+            rgba: 0.1,0.1,0.1,0.7
+        Rectangle:
+            pos: self.pos
+            size: (10000,100)
+    RelativeLayout:
+        id: temp_layout
+        padding: 10
+        orientation: "horizontal"
+        Label:
+            text: "Edit Mode: Drag to Add New States \nLong press to add transitions"
+            pos: (150,0)
+            size: (300,100)
+            size_hint: (None, None)
+    BoxLayout:
+        id: delete
+
+
+<UIObj_Transition>:
+    canvas:
+        Color:
+            rgba: 0,0,0,1
+        Line:
+            bezier: (self.origin_x, self.origin_y, self.mid_x*1.2, self.mid_y*1.2, self.end_x, self.end_y)
+            width: 2
+    Label:
+        text: root.tid
+        pos: root.mid_x, root.mid_y
+        size: (30,30)
+        size_hint: None, None
+
+<UI_LongTouch_Menu>:
+    id: long_touch_menu
+
+    BoxLayout:
+        size: 600,100
+#        size_hint: 0.2, 0.2
+        pos: 0,100
+        orientation: "horizontal"
+
+        Button:
+            text: "Edit Name"
+        Button:
+            text: "Delete State"
+
+
+
+
+

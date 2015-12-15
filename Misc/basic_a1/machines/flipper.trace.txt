@@ -1,0 +1,68 @@
+initial state= 0
+initial tape= *1*010101
+ 
+steps =  1
+state =  1
+tape =  1*0*10101
+ 
+steps =  2
+state =  1
+tape =  11*1*0101
+ 
+steps =  3
+state =  1
+tape =  110*0*101
+ 
+steps =  4
+state =  1
+tape =  1101*1*01
+ 
+steps =  5
+state =  1
+tape =  11010*0*1
+ 
+steps =  6
+state =  1
+tape =  110101*1*
+ 
+steps =  7
+state =  1
+tape =  1101010*b*
+ 
+steps =  8
+state =  2
+tape =  110101*0*b
+ 
+steps =  9
+state =  2
+tape =  11010*1*2b
+ 
+steps =  10
+state =  2
+tape =  1101*0*32b
+ 
+steps =  11
+state =  2
+tape =  110*1*232b
+ 
+steps =  12
+state =  2
+tape =  11*0*3232b
+ 
+steps =  13
+state =  2
+tape =  1*1*23232b
+ 
+steps =  14
+state =  2
+tape =  *1*323232b
+ 
+steps =  15
+state =  2
+tape =  *b*3323232b
+ 
+steps =  16
+state =  halt
+tape =  b*3*323232b
+ 
+halted with answer yes

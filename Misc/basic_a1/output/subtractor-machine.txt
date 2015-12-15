@@ -1,0 +1,129 @@
+The filename is ./machines/subtractor-machine.xml
+Blank char:  b
+Steps:  0
+State:  0
+Tape:  [1]11b11
+
+Steps:  1
+State:  0
+Tape:  1[1]1b11
+
+Steps:  2
+State:  0
+Tape:  11[1]b11
+
+Steps:  3
+State:  0
+Tape:  111[b]11
+
+Steps:  4
+State:  1
+Tape:  111b[1]1
+
+Steps:  5
+State:  1
+Tape:  111b1[1]
+
+Steps:  6
+State:  1
+Tape:  111b11[b]
+
+Steps:  7
+State:  2
+Tape:  111b1[1]b
+
+Steps:  8
+State:  3
+Tape:  111b[1]bb
+
+Steps:  9
+State:  3
+Tape:  111[b]1bb
+
+Steps:  10
+State:  4
+Tape:  11[1]b1bb
+
+Steps:  11
+State:  4
+Tape:  1[1]1b1bb
+
+Steps:  12
+State:  4
+Tape:  [1]11b1bb
+
+Steps:  13
+State:  4
+Tape:  [b]111b1bb
+
+Steps:  14
+State:  5
+Tape:  b[1]11b1bb
+
+Steps:  15
+State:  0
+Tape:  bb[1]1b1bb
+
+Steps:  16
+State:  0
+Tape:  bb1[1]b1bb
+
+Steps:  17
+State:  0
+Tape:  bb11[b]1bb
+
+Steps:  18
+State:  1
+Tape:  bb11b[1]bb
+
+Steps:  19
+State:  1
+Tape:  bb11b1[b]b
+
+Steps:  20
+State:  2
+Tape:  bb11b[1]bb
+
+Steps:  21
+State:  3
+Tape:  bb11[b]bbb
+
+Steps:  22
+State:  4
+Tape:  bb1[1]bbbb
+
+Steps:  23
+State:  4
+Tape:  bb[1]1bbbb
+
+Steps:  24
+State:  4
+Tape:  b[b]11bbbb
+
+Steps:  25
+State:  5
+Tape:  bb[1]1bbbb
+
+Steps:  26
+State:  0
+Tape:  bbb[1]bbbb
+
+Steps:  27
+State:  0
+Tape:  bbb1[b]bbb
+
+Steps:  28
+State:  1
+Tape:  bbb1b[b]bb
+
+Steps:  29
+State:  2
+Tape:  bbb1[b]bbb
+
+Steps:  30
+State:  halt
+Tape:  bbb[1]bbbb
+
+halted with answer yes
+
+Process finished with exit code 0

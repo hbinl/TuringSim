@@ -1,0 +1,73 @@
+The filename is ./machines/flipperN.xml
+Blank char:  b
+Steps:  0
+State:  0
+Tape:  [1]010101
+
+Steps:  1
+State:  1
+Tape:  1[0]10101
+
+Steps:  2
+State:  1
+Tape:  11[1]0101
+
+Steps:  3
+State:  1
+Tape:  110[0]101
+
+Steps:  4
+State:  1
+Tape:  1101[1]01
+
+Steps:  5
+State:  1
+Tape:  11010[0]1
+
+Steps:  6
+State:  1
+Tape:  110101[1]
+
+Steps:  7
+State:  1
+Tape:  1101010[b]
+
+Steps:  8
+State:  2
+Tape:  110101[0]b
+
+Steps:  9
+State:  2
+Tape:  11010[1]2b
+
+Steps:  10
+State:  2
+Tape:  1101[0]32b
+
+Steps:  11
+State:  2
+Tape:  110[1]232b
+
+Steps:  12
+State:  2
+Tape:  11[0]3232b
+
+Steps:  13
+State:  2
+Tape:  1[1]23232b
+
+Steps:  14
+State:  2
+Tape:  [1]323232b
+
+Steps:  15
+State:  2
+Tape:  [b]3323232b
+
+Steps:  16
+State:  halt
+Tape:  b[3]323232b
+
+halted with answer yes
+
+Process finished with exit code 0

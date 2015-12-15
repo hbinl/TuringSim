@@ -1,0 +1,3 @@
+title=Spike2
+author=Team
+orientation=landscape

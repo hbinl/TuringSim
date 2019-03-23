@@ -1,0 +1,28 @@
+<?xml version ="1.0"?>
+<turingmachine>
+  <alphabet>012345b</alphabet>
+  <initialtape>111</initialtape>
+  <blank char="b"/>
+  <initialstate name="a" />
+  <finalstates>
+    <finalstate name="halt" />
+    <finalstate name="halt2" />
+  </finalstates>
+  <states>
+    <state name="a">
+        <transition seensym="1" writesym="1" newstate="b" move="L"/>
+    </state>
+    <state name="b">
+        <transition seensym="b" writesym="0" newstate="c" move="R" />
+    </state>
+    <state name="c">
+        <transition seensym="0" writesym="1" newstate="c" move="R" />
+        <transition seensym="1" writesym="2" newstate="halt2" move="R" />
+    </state>
+    <state name="halt">
+    </state>
+    <state name="halt2">
+        <transition seensym="5" writesym="5" newstate="a" move="R" />
+    </state>
+  </states>
+</turingmachine>
